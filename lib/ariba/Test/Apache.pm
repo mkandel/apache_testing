@@ -68,17 +68,14 @@ sub start_mock2 {
     }
 
     unless ( $pid = fork ){
-#        close STDIN;
-#        close STDOUT;
-    #    use Mojo::Base 'Mojo::Server';
-        use Mojo::Server;
-        my $server = Mojo::Server->new;
+        use Mojo::Server::Daemon;
+        my $server = Mojo::Server::Daemon->new( listen => ["http://*:$port"] );
         my $app = $server->load_app( $self->{ 'mock_script' } );
 
-        print Dumper $server;
+        $server = $server->silent( 1 );
+        $self->{ 'mock_servs' }->{ 'port' } = $server;
 
-        $app->start( 'daemon', '-l', "http://*:$port" );
-        $self->{ 'mock_servs' }->{ 'port' } = $app;
+        $server->run;
     } else {
         $self->{ 'mock_pids' }->{ "$port" } = $pid;
     }

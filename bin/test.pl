@@ -80,7 +80,7 @@ print "\n$psOut\n";
 
 sub do_mock {
     ## Dummy, so I can call start/stop_mock()
-    my $apache_test  = ariba::Test::Apache->new({ port => 8888 });
+    my $apache_test  = ariba::Test::Apache->new({ port => 8888, debug => $mydebug });
     my $port = 9191;
 
     print "Starting a Mock on port '$port' ...\n";

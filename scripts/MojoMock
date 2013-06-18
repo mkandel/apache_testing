@@ -13,6 +13,8 @@ get '/' => sub {
   $self->render('index');
 };
 
+## Silence the damn messages this outputs ...
+app->log->level( 'fatal' );
 app->start( -daemon );
 __DATA__
 
