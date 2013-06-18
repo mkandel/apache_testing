@@ -6,6 +6,7 @@ use ariba::Test::Apache::TestServer;
 use Cwd;
 use Carp;
 use Data::Dumper;
+use IO::CaptureOutput qw( capture_exec );
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -32,6 +33,7 @@ sub new {
     $self->{ 'test_server' } = ariba::Test::Apache::TestServer->new( $args );
 
     $self->{ 'mock_pids'   } = {};
+    $self->{ 'mock_servs'  } = {};
 
     ## We run the mocks using morbo, make sure we have it.  Will ensure we have Mojoliciuos as well
     unless ( $self->{ 'morbo_exe' } && -x $self->{ 'morbo_exe' } ){
@@ -53,22 +55,47 @@ sub stop_server {
     return $self->{ 'test_server' }->stop();
 }
 
-#sub start_mock2 {
-#    my $self = shift;
-#    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
+sub start_mock2 {
+    my $self = shift;
+    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
 
-#    ## See http://stackoverflow.com/questions/15713422/how-can-i-get-the-port-that-mojoliciouslite-chooses
-#    ## For explanation of this stuff:
-#    require Mojolicious::Lite;
-#    use File::Slurp;
-#    my $app = Mojolicious::Lite->new();
-#    $app = read_file( $self->{ 'mock_script' } );
-#    @ARGV = qq(daemon --listen http://*:$port);
-#    app->static->paths->[0] = $self->{ 'run_dir' };
+    if ( defined $self->{ 'mock_pids' }->{ "$port" }
+        && $self->{ 'mock_pids' }->{ "$port" } =~ /\d+/
+    ){
+        ## We already have a Mock on this port
+        carp __PACKAGE__, ": ERROR: start_mock: Not starting another mock on port '$port'\n";
+        return 0;
+    }
 
-#    $app->start;
-#}
+    unless ( $pid = fork ){
+#        close STDIN;
+#        close STDOUT;
+    #    use Mojo::Base 'Mojo::Server';
+        use Mojo::Server;
+        my $server = Mojo::Server->new;
+        my $app = $server->load_app( $self->{ 'mock_script' } );
 
+        print Dumper $server;
+
+        $app->start( 'daemon', '-l', "http://*:$port" );
+        $self->{ 'mock_servs' }->{ 'port' } = $app;
+    } else {
+        $self->{ 'mock_pids' }->{ "$port" } = $pid;
+    }
+
+    if ( $self->{ 'debug' } ){
+        print Dumper $self->{ 'mock_pids' };
+        print Dumper $self->{ 'mock_servs' };
+    }
+
+}
+
+sub stop_mock2 {
+    my $self = shift;
+    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
+
+    return undef;
+}
 ## morbo --listen http://*:3002 MojoMock
 sub start_mock {
     my $self = shift;
@@ -89,11 +116,12 @@ sub start_mock {
     my $pid;
 
     unless ( $pid = fork ){
+        ## Child code:
         close STDIN;
         close STDOUT;
-        ## Child code:
-        exec $cmd, $redir, $bg;
-        #system $cmd;
+        my ( $stdOut, $stdErr, $success, $exitCode ) = capture_exec( $cmd );
+#        exec $cmd;
+#        exec $cmd, $redir, $bg;
         exit;
     } else {
         ## Parent - track port -> PID map:
@@ -108,8 +136,18 @@ sub stop_mock {
     my $self = shift;
     my $port = shift || croak __PACKAGE__, ": stop_mock: Port required!\n";
 
-#    print "Calling 'kill 9, $self->{ 'mock_pids' }->{ \"$port\" }'\n";
-    kill 9, $self->{ 'mock_pids' }->{ "$port" };
+
+    if ( defined $self->{ 'mock_pids' }->{ "$port" }
+        && $self->{ 'mock_pids' }->{ "$port" } =~ /\d+/
+    ){
+        if ( $self->{ 'debug' } ){
+            print "Calling 'kill 9, $self->{ 'mock_pids' }->{ \"$port\" }'\n";
+        }
+        kill 9, $self->{ 'mock_pids' }->{ "$port" };
+        delete $self->{ 'mock_pids' }->{ "$port" };
+    } else {
+        carp "Cannot kill mock for port '$port': No mock running on that port!\n";
+    }
 }
 
 1;

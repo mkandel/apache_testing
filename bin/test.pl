@@ -13,6 +13,7 @@ local $Data::Dumper::Useqq  = 1;
 local $Data::Dumper::Indent = 3;
 use Pod::Usage;
 use IO::CaptureOutput qw( capture_exec );
+use WWW::Mechanize;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -78,34 +79,40 @@ print "Apache process list:\n";
 print "\n$psOut\n";
 
 sub do_mock {
+    ## Dummy, so I can call start/stop_mock()
     my $apache_test  = ariba::Test::Apache->new({ port => 8888 });
     my $port = 9191;
+
+    print "Starting a Mock on port '$port' ...\n";
+    eval{
+        $apache_test->start_mock2( $port );
+    };
+    print "*** $@ ***\n" if $@;
+
+    sleep 5; ## Give Mojo a few seconds to start
+
+    my $mech = WWW::Mechanize->new();
+    $mech->get( "http://127.0.0.1:$port/" );
+    print "Read from mock on '$port':\n", $mech->content(), "\n";
+
 #    print "Starting a Mock on port '$port' ...\n";
-    eval{
-        $apache_test->start_mock( $port );
-    };
-    #print "*** $@ ***\n" if $@;
-
-    sleep 5; ## Give Mojo a few seconds to start
-
-    #print "Starting a Mock on port '$port' ...\n";
-    eval{
-        $apache_test->start_mock( $port );
-    };
-    #print "*** $@ ***\n" if $@;
-
-    sleep 5; ## Give Mojo a few seconds to start
+#    eval{
+#        $apache_test->start_mock( $port );
+#    };
+#    print "*** $@ ***\n" if $@;
+    #
+#    sleep 5; ## Give Mojo a few seconds to start
 
     $ps = 'ps -ef | grep Mojo | grep -v grep';
-    #print "Mock process list:\n";
+    print "Mock process list:\n";
     ( $psOut, $psErr, $ps_success, $ps_exitCode ) = capture_exec( $ps );
-    #print "\n$psOut\n";
+    print "\n$psOut\n";
 
-    #print "Stopping a Mock on port '$port' ...\n";
+    print "Stopping a Mock on port '$port' ...\n";
     eval{
         $apache_test->stop_mock( $port );
     };
-    #print "*** $@\n ***" if $@;
+    print "*** $@\n ***" if $@;
 }
 
 __END__

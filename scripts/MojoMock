@@ -13,7 +13,7 @@ get '/' => sub {
   $self->render('index');
 };
 
-app->start;
+app->start( -daemon );
 __DATA__
 
 @@ index.html.ep
