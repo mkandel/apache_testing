@@ -45,16 +45,16 @@ sub new{
 sub start {
     my $self = shift;
 
-    return $self->apachectl( 'start' );
+    return $self->_apachectl( 'start' );
 }
 
 sub stop {
     my $self = shift;
 
-    return $self->apachectl( 'stop' );
+    return $self->_apachectl( 'stop' );
 }
 
-sub apachectl {
+sub _apachectl {
     my $self   = shift;
     my $action = shift || croak __PACKAGE__, ": apachectl: action is a required argument, exiting.\n";
 
