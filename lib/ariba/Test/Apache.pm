@@ -26,11 +26,7 @@ sub new {
         print "$key: $val\n" if $args->{ 'debug' };
     }
 
-    $self->{ 'run_dir'     } = getcwd;
-    $self->{ 'script_dir'  } = $self->{ 'run_dir'} . '/scripts';
-    $self->{ 'mock_script' } = $self->{ 'script_dir' } . '/MojoMock';
     $self->{ 'test_server' } = ariba::Test::Apache::TestServer->new( $args );
-
     $self->{ 'mock_srvs'   } = {};
 
     return bless $self, $class;
@@ -61,6 +57,7 @@ sub stop_mock {
     my $port = shift || croak __PACKAGE__, ": stop_mock: Port required!\n";
 
     $self->{ 'mock_srvs' }->{ "$port" }->stop( $port );
+    delete $self->{ 'mock_srvs' }->{ "$port" };
 }
 
 1;
