@@ -1,11 +1,13 @@
 package ariba::Test::Apache::TestServer;
 
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
-use ariba::rc::Utils;
 use IO::CaptureOutput qw( capture_exec );
 use Carp;
 use Data::Dumper;
+use Cwd;
+
+use FindBin;
+use lib "$FindBin::Bin/../../lib";
+use ariba::rc::Utils;
 
 sub new{
     my $class = shift;
@@ -18,13 +20,15 @@ sub new{
     }
 
     ## Setting some defaults
+    $self->{ 'run_dir' } = getcwd;
+
     $self->{ 'port' } = 8080
         unless $self->{ 'port' };
     $self->{ 'apache_home' } = '/opt/apache'
         unless $self->{ 'apache_home' };
     $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl"
         unless $self->{ 'apachectl' };
-    $self->{ 'apache_conf' } = "$self->{ 'apache_home' }/conf/httpd.conf"
+    $self->{ 'apache_conf' } = "$self->{ 'run_dir' }/conf/httpd.conf"
         unless $self->{ 'apache_conf' };
     $self->{ 'action' } = 'nop' ## Dummy default to 'No Op'
         unless $self->{ 'action' };

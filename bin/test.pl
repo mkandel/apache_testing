@@ -102,7 +102,7 @@ sub do_mock {
     $mech->get( "http://127.0.0.1:$port/" );
     print "Read from mock on '$port':\n", $mech->content(), "\n";
     $mech->get( "http://127.0.0.1:$port2/" );
-    print "Read from mock on '$port':\n", $mech->content(), "\n";
+    print "Read from mock on '$port2':\n", $mech->content(), "\n";
 
 #    print "Starting a Mock on port '$port' ...\n";
 #    eval{
