@@ -29,16 +29,10 @@ sub new {
     $self->{ 'run_dir'     } = getcwd;
     $self->{ 'script_dir'  } = $self->{ 'run_dir'} . '/scripts';
     $self->{ 'mock_script' } = $self->{ 'script_dir' } . '/MojoMock';
-    $self->{ 'morbo_exe'   } = $args->{ 'morbo_exe' } || '/usr/local/bin/morbo';
     $self->{ 'test_server' } = ariba::Test::Apache::TestServer->new( $args );
 
     $self->{ 'mock_pids'   } = {};
     $self->{ 'mock_servs'  } = {};
-
-    ## We run the mocks using morbo, make sure we have it.  Will ensure we have Mojoliciuos as well
-    unless ( $self->{ 'morbo_exe' } && -x $self->{ 'morbo_exe' } ){
-        croak __PACKAGE__, ": new: Need valid path to morbo executable (part of Mojolicious Perl distro)\n";
-    }
 
     return bless $self, $class;
 }
@@ -55,7 +49,7 @@ sub stop_server {
     return $self->{ 'test_server' }->stop();
 }
 
-sub start_mock2 {
+sub start_mock {
     my $self = shift;
     my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
 
@@ -84,49 +78,6 @@ sub start_mock2 {
         print Dumper $self->{ 'mock_pids' };
         print Dumper $self->{ 'mock_servs' };
     }
-
-}
-
-sub stop_mock2 {
-    my $self = shift;
-    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
-
-    return undef;
-}
-## morbo --listen http://*:3002 MojoMock
-sub start_mock {
-    my $self = shift;
-    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
-
-    if ( defined $self->{ 'mock_pids' }->{ "$port" }
-        && $self->{ 'mock_pids' }->{ "$port" } =~ /\d+/
-    ){
-        ## We already have a Mock on this port
-        carp __PACKAGE__, ": ERROR: start_mock: Not starting another mock on port '$port'\n";
-        return 0;
-    }
-
-    my $cmd = "$self->{ 'morbo_exe' } --listen http://*:$port $self->{ 'mock_script' }";
-    #my $cmd = "morbo --listen http://*:$port MojoMock 2>&1 /dev/null &";
-    my $redir = '2>&1 /dev/null';
-    my $bg    = '&';
-    my $pid;
-
-    unless ( $pid = fork ){
-        ## Child code:
-        close STDIN;
-        close STDOUT;
-        my ( $stdOut, $stdErr, $success, $exitCode ) = capture_exec( $cmd );
-#        exec $cmd;
-#        exec $cmd, $redir, $bg;
-        exit;
-    } else {
-        ## Parent - track port -> PID map:
-#        $self->{ 'mock_pids' }->{ "$port" } = $pid;
-        ## hmmm, seemed to be 1 higher than the returned PID, now it's not ...
-        $self->{ 'mock_pids' }->{ "$port" } = ++$pid;
-    }
-#    print Dumper $self->{ 'mock_pids' };
 }
 
 sub stop_mock {

@@ -1,12 +1,11 @@
 package ariba::Test::Apache::TestServer;
-#use base 'Apache::TestRun';
-#use Apache::Test;
 
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 use ariba::rc::Utils;
 use IO::CaptureOutput qw( capture_exec );
 use Carp;
+use Data::Dumper;
 
 sub new{
     my $class = shift;
@@ -15,24 +14,26 @@ sub new{
 
     while ( my ( $key, $val ) = each %{ $args } ){
         $self->{ $key } = $val;
-#        print "$key: $val\n";
+        print "$key: $val\n" if $args->{ 'debug' };
     }
 
     ## Setting some defaults
-#    $self->{ 'sudoCmd'     } = ariba::rc::Utils::sudoCmd();
-    $self->{ 'port'        } = 8080
+    $self->{ 'port' } = 8080
         unless $self->{ 'port' };
     $self->{ 'apache_home' } = '/opt/apache'
         unless $self->{ 'apache_home' };
-    $self->{ 'apachectl'   } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl"
-        unless $self->{ 'apachectl'   };
-    $self->{ 'apache_conf' } = "$self->{ 'apache_home' }/conf/httpd.conf" unless $self->{ 'apache_conf' };
-#    $self->{ 'action'      } = 'nop' unless $self->{ 'action' };
+    $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl"
+        unless $self->{ 'apachectl' };
+    $self->{ 'apache_conf' } = "$self->{ 'apache_home' }/conf/httpd.conf"
+        unless $self->{ 'apache_conf' };
+    $self->{ 'action' } = 'nop' ## Dummy default to 'No Op'
+        unless $self->{ 'action' };
 
-    use Data::Dumper;
-#    print "Dumping ariba::Test::Apache::TestServer ISA:\n";
-#    print Dumper \@ISA;
-#    print Dumper $self;
+    if ( $self->{ 'debug' } ){
+        print "Dumping ariba::Test::Apache::TestServer ISA:\n";
+        print Dumper \@ISA;
+        print Dumper $self;
+    }
 
     return bless $self, $class;
 }
@@ -52,14 +53,25 @@ sub stop {
 sub apachectl {
     my $self   = shift;
     my $action = shift || croak __PACKAGE__, ": apachectl: action is a required argument, exiting.\n";
-    my %validOptions = (
-        'start'    => 1,
-        'stop'     => 1,
-        'restart'  => 1,
-    );
-    my $cmd = "$self->{ 'apachectl' } $action";
 
-#    print __PACKAGE__, ": Calling '$cmd'\n";
+    ## Valid apachectl options
+    ## start|restart|graceful|graceful-stop|stop
+    my %valid_actions = (
+        'start'       => 1,
+        'stop'        => 1,
+        'restart'     => 1,
+        'graceful'    => 1, ## graceful restart
+        'nop'         => 1,
+    );
+    return 0 unless $valid_actions{ $action } == 1;
+    return 1 if $action eq 'nop'; ## Default 'No Op'
+
+    my $cmd = "$self->{ 'apachectl' } $action -f $self->{ 'apache_conf' }";
+
+    if ( $self->{ 'debug' } ){
+        print __PACKAGE__, ": Action: '$action'\n";
+        print __PACKAGE__, ": Calling '$cmd'\n";
+    }
 
     my ( $stdOut, $stdErr, $success, $exitCode ) = capture_exec( $cmd );
     ## Print Errors
@@ -71,26 +83,6 @@ sub apachectl {
     }
     return $success;
 }
-
-#sub new_test_config {
-#    my $self = shift;
-#
-#    $self->{conf_opts}->{authname}      = 'Ariba, Inc.';
-#    $self->{conf_opts}->{httpd}         = '/opt/apache/bin/httpd';
-#    $self->{conf_opts}->{httpd_conf}    = '/opt/apache/conf/httpd.conf';
-#
-#    return $self->SUPER::new_test_config;
-#}
-#
-#sub bug_report {
-#    my $self = shift;
-#
-#    print <<EOI;
-#+--------------------------------------------------------+
-#| Error encountered, open a Tools ticket ...             |
-#+--------------------------------------------------------+
-#EOI
-#}
 
 1;
 

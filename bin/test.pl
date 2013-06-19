@@ -82,10 +82,17 @@ sub do_mock {
     ## Dummy, so I can call start/stop_mock()
     my $apache_test  = ariba::Test::Apache->new({ port => 8888, debug => $mydebug });
     my $port = 9191;
+    my $port2 = 9192;
 
     print "Starting a Mock on port '$port' ...\n";
     eval{
-        $apache_test->start_mock2( $port );
+        $apache_test->start_mock( $port );
+    };
+    print "*** $@ ***\n" if $@;
+
+    print "Starting a Mock on port '$port2' ...\n";
+    eval{
+        $apache_test->start_mock( $port2 );
     };
     print "*** $@ ***\n" if $@;
 
@@ -94,23 +101,26 @@ sub do_mock {
     my $mech = WWW::Mechanize->new();
     $mech->get( "http://127.0.0.1:$port/" );
     print "Read from mock on '$port':\n", $mech->content(), "\n";
+    $mech->get( "http://127.0.0.1:$port2/" );
+    print "Read from mock on '$port':\n", $mech->content(), "\n";
 
 #    print "Starting a Mock on port '$port' ...\n";
 #    eval{
 #        $apache_test->start_mock( $port );
 #    };
 #    print "*** $@ ***\n" if $@;
-    #
-#    sleep 5; ## Give Mojo a few seconds to start
 
-    $ps = 'ps -ef | grep Mojo | grep -v grep';
-    print "Mock process list:\n";
-    ( $psOut, $psErr, $ps_success, $ps_exitCode ) = capture_exec( $ps );
-    print "\n$psOut\n";
+#    sleep 5; ## Give Mojo a few seconds to start
 
     print "Stopping a Mock on port '$port' ...\n";
     eval{
         $apache_test->stop_mock( $port );
+    };
+    print "*** $@\n ***" if $@;
+
+    print "Stopping a Mock on port '$port2' ...\n";
+    eval{
+        $apache_test->stop_mock( $port2 );
     };
     print "*** $@\n ***" if $@;
 }
