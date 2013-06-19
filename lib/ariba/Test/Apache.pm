@@ -23,7 +23,7 @@ sub new {
 
     while ( my ( $key, $val ) = each %{ $args } ){
         $self->{ $key } = $val;
-#        print "$key: $val\n";
+        print "$key: $val\n" if $args->{ 'debug' };
     }
 
     $self->{ 'run_dir'     } = getcwd;
@@ -32,7 +32,6 @@ sub new {
     $self->{ 'test_server' } = ariba::Test::Apache::TestServer->new( $args );
 
     $self->{ 'mock_pids'   } = {};
-    $self->{ 'mock_servs'  } = {};
 
     return bless $self, $class;
 }
@@ -67,7 +66,6 @@ sub start_mock {
         my $app = $server->load_app( $self->{ 'mock_script' } );
 
         $server = $server->silent( 1 );
-        $self->{ 'mock_servs' }->{ 'port' } = $server;
 
         $server->run;
     } else {
@@ -76,7 +74,6 @@ sub start_mock {
 
     if ( $self->{ 'debug' } ){
         print Dumper $self->{ 'mock_pids' };
-        print Dumper $self->{ 'mock_servs' };
     }
 }
 
