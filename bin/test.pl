@@ -84,6 +84,12 @@ sub do_mock {
     my $port = 9191;
     my $port2 = 9192;
 
+#    print "This should fail, not a valid action 'blah' ...\n";
+#    eval{
+#        $apache_test->blah();
+#    };
+#    print "*** $@ ***\n" if $@;
+
     print "Starting a Mock on port '$port' ...\n";
     eval{
         $apache_test->start_mock( $port );
@@ -116,13 +122,13 @@ sub do_mock {
     eval{
         $apache_test->stop_mock( $port );
     };
-    print "*** $@\n ***" if $@;
+    print "*** $@ ***\n" if $@;
 
     print "Stopping a Mock on port '$port2' ...\n";
     eval{
         $apache_test->stop_mock( $port2 );
     };
-    print "*** $@\n ***" if $@;
+    print "*** $@ ***\n" if $@;
 }
 
 __END__

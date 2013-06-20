@@ -21,17 +21,20 @@ sub new{
 
     ## Setting some defaults
     $self->{ 'run_dir' } = getcwd;
-
-    $self->{ 'port' } = 8080
+    $self->{ 'port' } = $args{ 'port' } || 8080
         unless $self->{ 'port' };
-    $self->{ 'apache_home' } = '/opt/apache'
+    $self->{ 'apache_home' } = $args{ 'apache_home' } || '/opt/apache'
         unless $self->{ 'apache_home' };
+    $self->{ 'apache_conf' } = $args{ 'apache_conf' }
+        || "$self->{ 'run_dir' }/conf/httpd.conf"
+        || "$self->{ 'apache_home' }/conf/httpd.conf"
+        unless $self->{ 'apache_conf' };
+    $self->{ 'action' } = $args{ 'action' } || 'nop' ## Dummy default to 'No Op'
+        unless $self->{ 'action' };
+
+    ## Calculate this from apache_home
     $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl"
         unless $self->{ 'apachectl' };
-    $self->{ 'apache_conf' } = "$self->{ 'run_dir' }/conf/httpd.conf"
-        unless $self->{ 'apache_conf' };
-    $self->{ 'action' } = 'nop' ## Dummy default to 'No Op'
-        unless $self->{ 'action' };
 
     if ( $self->{ 'debug' } ){
         print "Dumping ariba::Test::Apache::TestServer ISA:\n";
@@ -42,32 +45,35 @@ sub new{
     return bless $self, $class;
 }
 
-sub start {
-    my $self = shift;
+sub AUTOLOAD {
+    my ($self) = shift;
+    my ($key, $val) = @_;
+    our $AUTOLOAD;
+    return if $AUTOLOAD =~ /::DESTROY$/;
+    my ($action) = $AUTOLOAD =~ m/.*::(\w+)$/;
 
-    return $self->_apachectl( 'start' );
-}
+    ## Valid apachectl options
+    ## start|restart|graceful|graceful-stop|stop
+    my %valid_actions = (
+        'start'         => 1,
+        'stop'          => 1,
+        'restart'       => 1,
+        'graceful'      => 1, ## graceful restart
+        'graceful-stop' => 1, ## graceful stop - probably not useful ...
+        'nop'           => 1, ## default/dummy 'No Op'
+    );
+    
+    unless ( defined $valid_actions{ $action } && $valid_actions{ $action } == 1 ){
+        croak __PACKAGE__, ": Invalid action '$action'";
+    }
 
-sub stop {
-    my $self = shift;
-
-    return $self->_apachectl( 'stop' );
+    return $self->_apachectl( $action );
 }
 
 sub _apachectl {
     my $self   = shift;
     my $action = shift || croak __PACKAGE__, ": apachectl: action is a required argument, exiting.\n";
 
-    ## Valid apachectl options
-    ## start|restart|graceful|graceful-stop|stop
-    my %valid_actions = (
-        'start'       => 1,
-        'stop'        => 1,
-        'restart'     => 1,
-        'graceful'    => 1, ## graceful restart
-        'nop'         => 1,
-    );
-    return 0 unless $valid_actions{ $action } == 1;
     return 1 if $action eq 'nop'; ## Default 'No Op'
 
     my $cmd = "$self->{ 'apachectl' } $action -f $self->{ 'apache_conf' }";

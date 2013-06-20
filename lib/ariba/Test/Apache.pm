@@ -60,6 +60,12 @@ sub stop_mock {
     delete $self->{ 'mock_srvs' }->{ "$port" };
 }
 
+sub blah {
+    my $self = shift;
+
+    return $self->{ 'test_server' }->blah();
+}
+
 1;
 
 __END__
