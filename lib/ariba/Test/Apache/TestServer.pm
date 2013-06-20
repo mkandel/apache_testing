@@ -1,13 +1,70 @@
+#------------------------------------------------------------------------------
+# $Id$
+# $HeadURL$
+#------------------------------------------------------------------------------
 package ariba::Test::Apache::TestServer;
+
+use warnings;
+use strict;
+
+use Data::Dumper;
+# Some Data::Dumper settings:
+local $Data::Dumper::Useqq  = 1;
+local $Data::Dumper::Indent = 3;
 
 use IO::CaptureOutput qw( capture_exec );
 use Carp;
-use Data::Dumper;
 use Cwd;
 
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 use ariba::rc::Utils;
+
+local $| = 1;
+
+=head1 NAME
+
+ariba::Test::Apache::TestServer - Discrete class representing the Apache server under test
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+use version; our $VERSION = '0.01';
+
+=head1 SYNOPSIS
+
+    use ariba::Test::Apache::TestServer;
+
+    my $server = ariba::Test::Apache::TestServer->new({ port => 8080 });
+
+    $server->start();
+    ... Run some tests ...
+    $server->restart();
+    ... Run some tests ...
+    $server->stop();
+
+=head1 DESCRIPTION
+
+These mock http servers are useful as workers for testing load balancing, mod JK config, WO config.  
+
+The mock is based on Mojolicious, a Perl web framework.  This is all contained in one Mojolicious script which can be extended to offer more complex test scenarios if needed.
+
+=cut
+
+=head1 PUBLIC METHODS
+
+new() 
+
+    FUNCTION: Instantiate a ariba::Test::Apache::TestServer object
+
+   ARGUMENTS: debug - Enable debugging for this module
+           
+     RETURNS: A ariba::Test::Apache::TestServer object
+
+=cut
 
 sub new{
     my $class = shift;
@@ -21,15 +78,15 @@ sub new{
 
     ## Setting some defaults
     $self->{ 'run_dir' } = getcwd;
-    $self->{ 'port' } = $args{ 'port' } || 8080
+    $self->{ 'port' } = $args->{ 'port' } || 8080
         unless $self->{ 'port' };
-    $self->{ 'apache_home' } = $args{ 'apache_home' } || '/opt/apache'
+    $self->{ 'apache_home' } = $args->{ 'apache_home' } || '/opt/apache'
         unless $self->{ 'apache_home' };
-    $self->{ 'apache_conf' } = $args{ 'apache_conf' }
+    $self->{ 'apache_conf' } = $args->{ 'apache_conf' }
         || "$self->{ 'run_dir' }/conf/httpd.conf"
         || "$self->{ 'apache_home' }/conf/httpd.conf"
         unless $self->{ 'apache_conf' };
-    $self->{ 'action' } = $args{ 'action' } || 'nop' ## Dummy default to 'No Op'
+    $self->{ 'action' } = $args->{ 'action' } || 'nop' ## Dummy default to 'No Op'
         unless $self->{ 'action' };
 
     ## Calculate this from apache_home
@@ -37,13 +94,24 @@ sub new{
         unless $self->{ 'apachectl' };
 
     if ( $self->{ 'debug' } ){
-        print "Dumping ariba::Test::Apache::TestServer ISA:\n";
-        print Dumper \@ISA;
+        print __PACKAGE__, ": Created object:\n";
         print Dumper $self;
     }
 
     return bless $self, $class;
 }
+
+=head1
+
+start()/stop()/restart()/graceful()/graceful-stop()
+
+    FUNCTION: Starts/Stops/Restarts the apache server
+
+   ARGUMENTS: None
+           
+     RETURNS: True (1) if action suceeds, (0) if action fails, croak's on unrecoverable error
+
+=cut
 
 sub AUTOLOAD {
     my ($self) = shift;
@@ -62,13 +130,25 @@ sub AUTOLOAD {
         'graceful-stop' => 1, ## graceful stop - probably not useful ...
         'nop'           => 1, ## default/dummy 'No Op'
     );
-    
+
     unless ( defined $valid_actions{ $action } && $valid_actions{ $action } == 1 ){
         croak __PACKAGE__, ": Invalid action '$action'";
     }
 
     return $self->_apachectl( $action );
 }
+
+=head1 PRIVATE METHODS
+
+_apachectl()
+
+    FUNCTION: 
+
+   ARGUMENTS: Action to perform: start/stop/restart/graceful/graceful-stop
+
+     RETURNS: True (1) if action suceeds, (0) if action fails
+
+=cut
 
 sub _apachectl {
     my $self   = shift;
@@ -94,7 +174,17 @@ sub _apachectl {
     return $success;
 }
 
-1;
+=head1 AUTHOR
+
+Marc Kandel C<< <mkandel at ariba.com> >>
+
+=head1 LICENSE
+
+Copyright 2013 Ariba, Inc. (an SAP Company)
+
+=cut
+
+1; # End of Module
 
 __END__
 

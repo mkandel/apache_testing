@@ -1,4 +1,4 @@
 #!/bin/sh
-./bin/test.pl
+./bin/test.pl $@
 echo "run complete, leftover cruft:"
 lsof | grep Mock | grep -v vim ; ps -ef | grep Mock | grep -v grep | grep -v vim; ps -ef | grep test.pl | grep -v grep | grep -v vim
