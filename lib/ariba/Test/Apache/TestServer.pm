@@ -103,7 +103,7 @@ sub new{
 
 =head1
 
-start()/stop()/restart()/graceful()/graceful-stop()
+start()/stop()/restart()/graceful()/graceful_stop()
 
     FUNCTION: Starts/Stops/Restarts the apache server
 
@@ -127,11 +127,15 @@ sub AUTOLOAD {
         'stop'          => 1,
         'restart'       => 1,
         'graceful'      => 1, ## graceful restart
-        'graceful-stop' => 1, ## graceful stop - probably not useful ...
+        'graceful_stop' => 1, ## graceful stop - probably not useful ...
         'nop'           => 1, ## default/dummy 'No Op'
     );
+    if ( $self->{ 'debug' } ) {
+        print Dumper \%valid_actions;
+        print __PACKAGE__, ": AUTOLOAD: Got '$action' from '$AUTOLOAD'\n";
+    }
 
-    unless ( defined $valid_actions{ $action } && $valid_actions{ $action } == 1 ){
+    unless ( defined $valid_actions{ "$action" } && $valid_actions{ "$action" } == 1 ){
         croak __PACKAGE__, ": Invalid action '$action'";
     }
 
@@ -155,6 +159,8 @@ sub _apachectl {
     my $action = shift || croak __PACKAGE__, ": apachectl: action is a required argument, exiting.\n";
 
     return 1 if $action eq 'nop'; ## Default 'No Op'
+
+    $action =~ s/_/-/; ## convert graceful_stop to graceful-stop for commandline
 
     my $cmd = "$self->{ 'apachectl' } $action -f $self->{ 'apache_conf' }";
 
