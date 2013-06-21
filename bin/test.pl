@@ -84,7 +84,9 @@ sub do_mock {
     my $port = 9191;
     my $port2 = 9192;
 
-    $apache_test->stop_server();
+    eval{
+        $apache_test->stop_server();
+    };
 #    print "This should fail, not a valid action 'blah' ...\n";
 #    eval{
 #        $apache_test->blah();
