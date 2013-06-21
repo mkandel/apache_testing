@@ -5,9 +5,9 @@ use Test::More qw(no_plan);
 use lib 'lib';
 use lib '../lib';
 
-BEGIN {
-    my $module_under_test = 'ariba::Test::Apache::MockServer';
+my $tests_run = 0;
+my $module_under_test = 'ariba::Test::Apache::MockServer';
 
-    use_ok( "$module_under_test" ) || print "Bail out!\n"; $tests_run++;
-}
+use_ok( "$module_under_test" ) || print "Bail out!\n"; $tests_run++;
 
+done_testing( $tests_run );

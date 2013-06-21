@@ -5,13 +5,11 @@ use Test::More qw(no_plan);
 use lib 'lib';
 use lib '../lib';
 
-#my $tests_run = 0;
+my $tests_run = 0;
 
-BEGIN {
-    my $module_under_test = 'ariba::Test::Apache::TestServer';
+my $module_under_test = 'ariba::Test::Apache::TestServer';
 
-    use_ok( "$module_under_test" ) || print "Bail out!\n"; #$tests_run++;
-}
+use_ok( "$module_under_test" ) || print "Bail out!\n"; $tests_run++;
 
 #done_testing( );
-#done_testing( $tests_run );
+done_testing( $tests_run );
