@@ -18,7 +18,6 @@ use Cwd;
 
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
-use ariba::rc::Utils;
 
 local $| = 1;
 
