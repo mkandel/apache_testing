@@ -114,11 +114,15 @@ start()/stop()/restart()/graceful()/graceful_stop()
 =cut
 
 sub AUTOLOAD {
-    my ($self) = shift;
-    my ($key, $val) = @_;
+    my $self = shift;
+#    my ($key, $val) = @_;
     our $AUTOLOAD;
     return if $AUTOLOAD =~ /::DESTROY$/;
-    my ($action) = $AUTOLOAD =~ m/.*::(\w+)$/;
+    if ( $self->{ 'debug' } ) {
+        print __PACKAGE__, ": AUTOLOAD: Got '$AUTOLOAD'\n";
+    }
+    $AUTOLOAD =~ m/.*::(\w+)$/;
+    my $action = $1;
 
     ## Valid apachectl options
     ## start|restart|graceful|graceful-stop|stop
@@ -140,6 +144,26 @@ sub AUTOLOAD {
     }
 
     return $self->_apachectl( $action );
+}
+
+=head1
+
+is_running()
+
+    FUNCTION: Starts/Stops/Restarts the apache server
+
+   ARGUMENTS: None
+           
+     RETURNS: True (1) if action suceeds, (0) if action fails, croak's on unrecoverable error
+
+=cut
+
+sub is_running {
+    my $self = shift;
+
+    return ( defined $self->{ 'is_running' } && $self->{ 'is_running' } == 1 )
+        ? 1
+        : 0;
 }
 
 =head1 PRIVATE METHODS
@@ -177,6 +201,22 @@ sub _apachectl {
             print __PACKAGE__, ": '$action' returned Error:\n$stdErr\n";
         }
     }
+
+    ## Set/unset is_running appropriately
+    if ( $action eq 'start' && $success ){ 
+        if ( $self->is_running() ){
+            carp "Not starting again, server is already running.\n";
+            return 1; ## return success since we're running and that's what was asked of us
+        }
+        $self->{ 'is_running' } = 1;
+    } elsif ( $success && $action =~ /stop/ ){
+        unless ( $self->is_running() ){
+            carp "Not stopping server, server is already stopped.\n";
+            return 1; ## return success since we're running and that's what was asked of us
+        }
+        delete $self->{ 'is_running' };
+    }
+
     return $success;
 }
 
