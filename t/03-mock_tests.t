@@ -8,6 +8,6 @@ use lib '../lib';
 my $tests_run = 0;
 sub module_under_test { return 'ariba::Test::Apache::MockServer' };
 
-use_ok( module_under_test() ) || print "Bail out!\n"; $tests_run++;
+use_ok( module_under_test() );
 
 #done_testing( $tests_run );
