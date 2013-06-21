@@ -7,9 +7,11 @@ use lib '../lib';
 
 my $tests_run = 0;
 
-my $module_under_test = 'ariba::Test::Apache::TestServer';
+sub module_under_test { return 'ariba::Test::Apache::TestServer' };
 
-use_ok( "$module_under_test" ) || print "Bail out!\n"; $tests_run++;
+BEGIN{
+    use_ok( module_under_test() ) || print "Bail out!\n"; $tests_run++;
+}
 
 #done_testing( );
-done_testing( $tests_run );
+#done_testing( $tests_run );
