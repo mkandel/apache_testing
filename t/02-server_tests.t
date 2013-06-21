@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Test::Exception;
 
 use lib 'lib';
@@ -16,12 +16,12 @@ BEGIN{
     use_ok( module_under_test() ); $tests_run++;
 }
 
-my $server = ariba::Test::Apache::TestServer->new({ port => $port });
+my $server = ariba::Test::Apache::TestServer->new({ port => $port, debug => 0 });
 my $server2 = ariba::Test::Apache::TestServer->new({ port => ++$port, debug => 1 });
 
 my @methods_to_test = qw{ start stop restart graceful graceful_stop };
 foreach my $method ( @methods_to_test ){
-    #diag( "Testing ariba::Test::Apache::TestServer->$method()" );
+    diag( "Testing ariba::Test::Apache::TestServer->$method() ('$method')" );
     my $expected_success = 1;
     my $result = $server->$method();
     is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
@@ -37,7 +37,7 @@ ok( $server->stop(), '$server->stop()' );
 ok( $server->nop(), '$server->nop() - dummy no op' );
 
 dies_ok { $server->bad_method_name() } 'Properly handle invalid action';
-#throws_ok( { $server->bad_method_name() }, qr/: Invalid action /, 'Properly handle invalid action' );
+throws_ok { $server->bad_method_name() } qr/: Invalid action /, 'Properly handle invalid action';
 
 #done_testing( );
 #done_testing( $tests_run );
