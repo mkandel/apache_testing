@@ -2,3 +2,4 @@ doit.pl
 .*.s??
 .nfs*
 commands
+cover_db/*
