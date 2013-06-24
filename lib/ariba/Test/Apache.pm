@@ -141,23 +141,17 @@ sub start_mock {
     my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
 
     $self->{ 'mock_srvs' }->{ "$port" } = ariba::Test::Apache::MockServer->new( $self->{ 'args' } );
-    $self->{ 'mock_srvs' }->{ "$port" }->start( $port );
+    return $self->{ 'mock_srvs' }->{ "$port" }->start( $port );
 }
 
 sub stop_mock {
     my $self = shift;
     my $port = shift || croak __PACKAGE__, ": stop_mock: Port required!\n";
 
-    $self->{ 'mock_srvs' }->{ "$port" }->stop( $port );
+    ## I would just 'return $self->blah->stop' but i want to delete the hash element after stopping
+    my $retval = $self->{ 'mock_srvs' }->{ "$port" }->stop( $port );
     delete $self->{ 'mock_srvs' }->{ "$port" };
-}
-
-## TODO: figure out a better way to test this (in a .t file)
-## Bad call so I can test ariba::Test::TestServer
-sub blah {
-    my $self = shift;
-
-    return $self->{ 'test_server' }->blah();
+    return $retval;
 }
 
 =head1 AUTHOR

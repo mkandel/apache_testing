@@ -134,12 +134,14 @@ sub start {
         return 1;
     } else {
         $self->{ 'mock_pids' }->{ "$port" } = $pid;
+
+        if ( $self->{ 'debug' } ){
+            print Dumper $self->{ 'mock_pids' };
+        }
+
         return 1;
     }
 
-    if ( $self->{ 'debug' } ){
-        print Dumper $self->{ 'mock_pids' };
-    }
 }
 
 sub stop {
