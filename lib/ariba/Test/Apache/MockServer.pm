@@ -131,8 +131,10 @@ sub start {
         $server = $server->silent( 1 );
 
         $server->run;
+        return 1;
     } else {
         $self->{ 'mock_pids' }->{ "$port" } = $pid;
+        return 1;
     }
 
     if ( $self->{ 'debug' } ){
@@ -153,8 +155,10 @@ sub stop {
         }
         kill 9, $self->{ 'mock_pids' }->{ "$port" };
         delete $self->{ 'mock_pids' }->{ "$port" };
+        return 1;
     } else {
         carp "Cannot kill mock for port '$port': No mock running on that port!\n";
+        return 0;
     }
 }
 

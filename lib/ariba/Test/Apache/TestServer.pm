@@ -115,7 +115,6 @@ start()/stop()/restart()/graceful()/graceful_stop()
 
 sub AUTOLOAD {
     my $self = shift;
-#    my ($key, $val) = @_;
     our $AUTOLOAD;
     return if $AUTOLOAD =~ /::DESTROY$/;
     if ( $self->{ 'debug' } ) {
