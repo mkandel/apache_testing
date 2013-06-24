@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl -w
+use strict; use warnings;
 
 use Test::More tests => 18;
 use Test::Exception;
-use Test::Differences;
 use Test::Warn;
 
 use lib 'lib';

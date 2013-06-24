@@ -16,18 +16,13 @@ eval "use Pod::Coverage $min_pc";
 plan skip_all => "Pod::Coverage $min_pc required for testing POD coverage"
     if $@;
 
-#-----------------------------------------------------------------------------
+plan tests => 3;
+#all_modules( ['lib', '../lib' ] );
+my @modules = ( 'lib/ariba/Test/Apache.pm', 'lib/ariba/Test/Apache/TestServer.pm', 'lib/ariba/Test/Apache/MockServer.pm' );
 
-all_non_testsuite_pod();
-
-#-----------------------------------------------------------------------------
-
-sub all_non_testsuite_pod {
-
-	my @modules = ( 'ariba::Ops::OracleSIDRemap' );
-	plan tests => scalar @modules;
-	foreach my $module ( @modules ) {
-		pod_coverage_ok($module);
-	}
-	return;
+foreach my $module ( @modules ){
+    pod_coverage_ok( $module );
 }
+
+__END__
+
