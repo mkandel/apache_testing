@@ -192,28 +192,34 @@ sub _apachectl {
         print __PACKAGE__, ": Calling '$cmd'\n";
     }
 
+    if ( $action eq 'start' && $self->is_running() ){
+            carp "Not starting again, server is already running.\n";
+            return 1; ## return success since we're running and that's what was asked of us
+    } elsif ( $action eq 'stop' && ! $self->is_running() ){
+            carp "Not stopping server, server is already stopped.\n";
+            return 1; ## return success since we're stopped and that's what was asked of us
+    }
+
     my ( $stdOut, $stdErr, $success, $exitCode ) = capture_exec( $cmd );
     ## Print Errors
     if ( $stdErr ){
-        ## Except debug
-        if ( $stdErr !~ /:debug/ ){
-            print __PACKAGE__, ": '$action' returned Error:\n$stdErr\n";
+        my @errs = split /\n/, $stdErr;
+        foreach my $line ( @errs ){
+            chomp $line;
+            ## Except debug
+            if ( $line !~ /proxy:debug/ ){ ## ignore proxy:debug messages
+                print __PACKAGE__, ": '$action' returned Error:\n$line\n";
+            }
         }
     }
 
     ## Set/unset is_running appropriately
     if ( $action eq 'start' && $success ){ 
-        if ( $self->is_running() ){
-            carp "Not starting again, server is already running.\n";
-            return 1; ## return success since we're running and that's what was asked of us
-        }
         $self->{ 'is_running' } = 1;
+#        return 1;
     } elsif ( $success && $action =~ /stop/ ){
-        unless ( $self->is_running() ){
-            carp "Not stopping server, server is already stopped.\n";
-            return 1; ## return success since we're running and that's what was asked of us
-        }
         delete $self->{ 'is_running' };
+#        return 1;
     }
 
     return $success;

@@ -32,10 +32,11 @@ BEGIN{
 
     my $fw1 = module_under_test()->new({ port => 8081 });
     my $fw2 = module_under_test()->new({ 
+            name => 'fw2',
             port => 8081,
             debug => 1,
             apache_home => '/opt/apache',
-            apache_conf => '/home/mkandel/src/POC/apache_testing/ariba_tests/framework/conf/apache_configs/httpd.conf',
+            apache_conf => '/opt/apache/conf/httpd.conf',
             apachectl   => '/opt/apache/bin/apachectl',
             action      => 'nop',
     });
@@ -49,8 +50,8 @@ BEGIN{
         my $result = $fw1->$method();
         is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
 
-#        my $result = $fw2->$method();
-#        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+        my $result = $fw2->$method();
+        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
     }
 
     my @mock_methods = qw{ start_mock stop_mock };

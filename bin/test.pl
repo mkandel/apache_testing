@@ -33,10 +33,17 @@ GetOptions(
 my $prog = $0;
 $prog =~ s/^.*\///;
 
-do_mock();
-exit;
+#do_mock();
+#exit;
 
-my $apache_test  = ariba::Test::Apache->new({ port => 8888 });
+my $apache_test  = ariba::Test::Apache->new({ 
+        port => 8888,
+        debug => 1,
+        apache_home => '/opt/apache',
+        apache_conf => '/home/mkandel/src/POC/apache_testing/ariba_tests/framework/conf/apache_configs/httpd.conf',
+        apachectl   => '/opt/apache/bin/apachectl',
+        action      => 'nop',
+});
 print "With args:\n";
 print Dumper $apache_test;
 
@@ -50,7 +57,7 @@ print "Trying to start apache ...\n";
 eval{
     $return = $apache_test->start_server();
 };
-#print "$@\n" if $@;
+print "** $@\n" if $@;
 print "Call returned: '$return'\n";
 #print Dumper $return;
 
@@ -66,9 +73,12 @@ print "Trying to stop apache ...\n";
 eval{
     $return = $apache_test->stop_server();
 };
-#print "$@\n" if $@;
+print "** $@\n" if $@;
 print "Call returned: '$return'\n";
 #print Dumper $return;
+
+#do_mock();
+exit;
 
 print "Sleeping $sleep seconds ...\n";
 sleep $sleep;
