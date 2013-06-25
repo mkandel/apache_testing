@@ -25,18 +25,17 @@ BEGIN{
 ## Test the mock object(s): 
 {
 
-    my $port1 = 8080;
-    my $port2 = 8081;
+    my $port1 = 8888;
+    my $port2 = 8889;
     my $mock1 = 9090;
     my $mock2 = 9091;
 
-    my $fw1 = module_under_test()->new({ port => 8081 });
+    my $fw1 = module_under_test()->new({ port => $port1 });
     my $fw2 = module_under_test()->new({ 
-            name => 'fw2',
-            port => 8081,
+            port => $port2,
             debug => 1,
             apache_home => '/opt/apache',
-            apache_conf => '/opt/apache/conf/httpd.conf',
+            apache_conf => '/home/mkandel/src/POC/apache_testing/ariba_tests/framework/conf/httpd.conf',
             apachectl   => '/opt/apache/bin/apachectl',
             action      => 'nop',
     });
@@ -48,10 +47,10 @@ BEGIN{
         my $expected_success = 1;
 
         my $result = $fw1->$method();
-        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method() (fw1)" );
 
-        my $result = $fw2->$method();
-        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+        $result = $fw2->$method();
+        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method() (fw2)" );
     }
 
     my @mock_methods = qw{ start_mock stop_mock };
@@ -68,6 +67,14 @@ BEGIN{
         throws_ok( sub { $fw1->$method() }, qr/Port required!/
             , 'Must specify port for start_mock and stop_mock actions' );
     }
+
+    throws_ok( sub { $fw1->stop_server() }, qr/Server not started, can't call stop/
+        , 'Attempt to stop a server that is not started.' );
+
+    ok( $fw1->start_server(), 'Cleanly start apache' );
+    throws_ok( sub { $fw1->start_server() }, qr/Server already started, can't call start again./
+        , 'Attempt to start a server that is already started.' );
+    ok( $fw1->stop_server(), 'Cleanly stop apache' );
 }
 
 __END__
