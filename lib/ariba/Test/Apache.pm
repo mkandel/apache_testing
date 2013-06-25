@@ -109,6 +109,9 @@ start_server()/stop_server()
 sub start_server {
     my $self = shift;
 
+    if ( $self->{ 'test_server' }->is_running() ){
+        croak "Server already started, can't call start again.\n";
+    }
     return $self->{ 'test_server' }->start();
 }
 
@@ -116,7 +119,7 @@ sub stop_server {
     my $self = shift;
 
     unless ( $self->{ 'test_server' }->is_running() ){
-        croak "Server not started, can't call stop() ...\n";
+        croak "Server not started, can't call stop.\n";
     }
     return $self->{ 'test_server' }->stop();
 }
