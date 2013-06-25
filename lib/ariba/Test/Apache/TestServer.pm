@@ -15,6 +15,7 @@ local $Data::Dumper::Indent = 3;
 use IO::CaptureOutput qw( capture_exec );
 use Carp;
 use Cwd;
+use Apache::Admin::Config; ## For manipulating Apache config
 
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
@@ -83,19 +84,39 @@ sub new{
     $self->{ 'apache_home' } = $args->{ 'apache_home' } || '/opt/apache'
         unless $self->{ 'apache_home' };
     $self->{ 'apache_conf' } = $args->{ 'apache_conf' }
-        || "$self->{ 'run_dir' }/conf/apache_configs/httpd.conf"
+        || "$self->{ 'run_dir' }/conf/httpd.conf"
         || "$self->{ 'apache_home' }/conf/httpd.conf"
         unless $self->{ 'apache_conf' };
     $self->{ 'action' } = $args->{ 'action' } || 'nop' ## Dummy default to 'No Op'
         unless $self->{ 'action' };
 
     ## Calculate this from apache_home
-    $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl"
-        unless $self->{ 'apachectl' };
+    $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl";
+#        unless $self->{ 'apachectl' };
+
+    ## Since listen port is hard coded in the config, we'll muck with it here:
+    my $conf = new Apache::Admin::Config "$self->{ 'apache_conf' }"
+        or die $Apache::Admin::Config::ERROR;
+
+    my $directive = $conf->directive( 'Listen' );
+    $directive->delete();
+
+    $conf->add_directive( Listen => "$self->{ 'port' }" );
+    $conf->add_directive( PidFile => "/tmp/httpd.$self->{ 'port' }.$$.pid" );
+
+    ## Save filename in /tmp with port and PID
+    $self->{ 'apache_conf_adj' } = "/tmp/httpd.$self->{ 'port' }.$$.conf";
+    $conf->save( "$self->{ 'apache_conf_adj' }" )
+        or croak "Error saving adjusted Apache config: ", $conf->error(), "\n";
 
     if ( $self->{ 'debug' } ){
         print __PACKAGE__, ": Created object:\n";
         print Dumper $self;
+        my $directive = $conf->directive( 'listen' );
+        print "Listen: ", $directive->value, "\n";
+        $directive = $conf->directive( 'ErrorLog' );
+        print "ErrorLog: ", $directive->value, "\n";
+        #print Dumper $directive;
     }
 
     return bless $self, $class;
@@ -133,9 +154,10 @@ sub AUTOLOAD {
         'graceful_stop' => 1, ## graceful stop - probably not useful ...
         'nop'           => 1, ## default/dummy 'No Op'
     );
+
     if ( $self->{ 'debug' } ) {
-        print Dumper \%valid_actions;
         print __PACKAGE__, ": AUTOLOAD: Got '$action' from '$AUTOLOAD'\n";
+        print Dumper $self;
     }
 
     unless ( defined $valid_actions{ "$action" } && $valid_actions{ "$action" } == 1 ){
@@ -143,6 +165,11 @@ sub AUTOLOAD {
     }
 
     return $self->_apachectl( $action );
+}
+
+sub DESTROY {
+    my $self = shift;
+    #unlink $self->{ 'apache_conf_adj' } or croak "Error deleting temp config file: $!\n";
 }
 
 =head1
@@ -185,7 +212,7 @@ sub _apachectl {
 
     $action =~ s/_/-/; ## convert graceful_stop to graceful-stop for commandline
 
-    my $cmd = "$self->{ 'apachectl' } $action -f $self->{ 'apache_conf' }";
+    my $cmd = "$self->{ 'apachectl' } $action -f $self->{ 'apache_conf_adj' }";
 
     if ( $self->{ 'debug' } ){
         print __PACKAGE__, ": Action: '$action'\n";
@@ -204,6 +231,7 @@ sub _apachectl {
     ## Print Errors
     if ( $stdErr ){
         my @errs = split /\n/, $stdErr;
+        @errs = grep { $_ !~ /proxy:debug/ } @errs;
 
         print __PACKAGE__, ": '$action' returned Error(s):\n";
         foreach my $line ( @errs ){
@@ -218,10 +246,8 @@ sub _apachectl {
     ## Set/unset is_running appropriately
     if ( $action eq 'start' && $success ){ 
         $self->{ 'is_running' } = 1;
-#        return 1;
     } elsif ( $success && $action =~ /stop/ ){
         delete $self->{ 'is_running' };
-#        return 1;
     }
 
     return $success;
