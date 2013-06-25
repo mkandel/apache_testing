@@ -31,23 +31,39 @@ BEGIN{
     my $mock2 = 9091;
 
     my $fw1 = module_under_test()->new({ port => 8081 });
-    my $fw2 = module_under_test()->new({ port => 8081, debug => 1 });
+    my $fw2 = module_under_test()->new({ 
+            port => 8081,
+            debug => 1,
+            apache_home => '/opt/apache',
+            apache_conf => '/home/mkandel/src/POC/apache_testing/ariba_tests/framework/conf/apache_configs/httpd.conf',
+            apachectl   => '/opt/apache/bin/apachectl',
+            action      => 'nop',
+    });
     
     my @serv_methods = qw{ start_server stop_server };
 
     foreach my $method ( @serv_methods ){
         #diag( "Testing ariba::Test::Apache::TestServer->$method() ('$method')" );
         my $expected_success = 1;
+
         my $result = $fw1->$method();
         is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+
+#        my $result = $fw2->$method();
+#        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
     }
 
     my @mock_methods = qw{ start_mock stop_mock };
     foreach my $method ( @mock_methods ){
         #diag( "Testing ariba::Test::Apache::TestServer->$method() ('$method')" );
         my $expected_success = 1;
+
         my $result = $fw1->$method( $mock1 );
         is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+
+        $result = $fw2->$method( $mock2 );
+        is( $result, $expected_success, "Testing ariba::Test::Apache::TestServer->$method()" );
+
         throws_ok( sub { $fw1->$method() }, qr/Port required!/
             , 'Must specify port for start_mock and stop_mock actions' );
     }
