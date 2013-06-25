@@ -92,7 +92,6 @@ sub new{
 
     ## Calculate this from apache_home
     $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl";
-#        unless $self->{ 'apachectl' };
 
     ## Since listen port is hard coded in the config, we'll muck with it here:
     my $conf = new Apache::Admin::Config "$self->{ 'apache_conf' }"
@@ -169,7 +168,10 @@ sub AUTOLOAD {
 
 sub DESTROY {
     my $self = shift;
-    #unlink $self->{ 'apache_conf_adj' } or croak "Error deleting temp config file: $!\n";
+    unless ( -e $self->{ 'apache_conf_adj' } ){
+    }
+    unlink $self->{ 'apache_conf_adj' }
+        or croak "Error deleting temp config file ($self->{ 'apache_conf_adj' }): $!\n";
 }
 
 =head1
