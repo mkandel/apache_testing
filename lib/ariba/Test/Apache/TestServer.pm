@@ -83,7 +83,7 @@ sub new{
     $self->{ 'apache_home' } = $args->{ 'apache_home' } || '/opt/apache'
         unless $self->{ 'apache_home' };
     $self->{ 'apache_conf' } = $args->{ 'apache_conf' }
-        || "$self->{ 'run_dir' }/conf/httpd.conf"
+        || "$self->{ 'run_dir' }/conf/apache_configs/httpd.conf"
         || "$self->{ 'apache_home' }/conf/httpd.conf"
         unless $self->{ 'apache_conf' };
     $self->{ 'action' } = $args->{ 'action' } || 'nop' ## Dummy default to 'No Op'
