@@ -204,11 +204,13 @@ sub _apachectl {
     ## Print Errors
     if ( $stdErr ){
         my @errs = split /\n/, $stdErr;
+
+        print __PACKAGE__, ": '$action' returned Error(s):\n";
         foreach my $line ( @errs ){
             chomp $line;
             ## Except debug
             if ( $line !~ /proxy:debug/ ){ ## ignore proxy:debug messages
-                print __PACKAGE__, ": '$action' returned Error:\n$line\n";
+                print "  $line\n";
             }
         }
     }
