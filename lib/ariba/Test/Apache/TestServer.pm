@@ -168,10 +168,10 @@ sub AUTOLOAD {
 
 sub DESTROY {
     my $self = shift;
-    unless ( -e $self->{ 'apache_conf_adj' } ){
+    if ( -e $self->{ 'apache_conf_adj' } ){
+        unlink $self->{ 'apache_conf_adj' }
+            or croak "Error deleting temp config file ($self->{ 'apache_conf_adj' }): $!\n";
     }
-    unlink $self->{ 'apache_conf_adj' }
-        or croak "Error deleting temp config file ($self->{ 'apache_conf_adj' }): $!\n";
 }
 
 =head1
