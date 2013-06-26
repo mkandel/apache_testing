@@ -6,11 +6,36 @@ use Data::Dumper;
 plugin 'PODRenderer';
 
 get '/' => sub {
-  my $self = shift;
+    my $self = shift;
 
-  $self->stash(port => $self->tx->local_port );
+    $self->stash( port => $self->tx->local_port );
 
-  $self->render('index');
+    $self->render( 'index_t' );
+};
+
+get '/sleep' => sub {
+    my $self = shift;
+
+    my $MAX_SLEEPTIME = 4.95;
+
+    ## Sleep from .05 - 5 seconds
+    my $sleeptime = rand( $MAX_SLEEPTIME ) + .05;
+
+    $self->redirect_to( "/sleep/$sleeptime" );
+};
+
+get '/sleep/*time' => sub {
+    my $self = shift;
+
+    my $sleeptime = $self->param( 'time' );
+    print "Got '$sleeptime' seconds\n";
+    $self->stash( sleeptime => $sleeptime );
+    $self->stash( port => $self->tx->local_port );
+
+    print "Sleeping for '$sleeptime' seconds\n";
+    sleep $sleeptime;
+    print "Done sleeping\n";
+    $self->render( 'sleep_t' );
 };
 
 ## Silence the damn messages this outputs ...
@@ -18,10 +43,16 @@ app->log->level( 'fatal' );
 app->start( -daemon );
 __DATA__
 
-@@ index.html.ep
+@@ index_t.html.ep
 % layout 'default';
 % title 'Balancer Testing';
 Listening on port: <%= $port %>
+
+@@ sleep_t.html.ep
+% layout 'default';
+% title 'Balancer Testing';
+Listening on port: <%= $port %><BR>
+Slept for: <%= $sleeptime %> seconds
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
