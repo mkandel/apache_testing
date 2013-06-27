@@ -12,9 +12,9 @@ use Data::Dumper;
 local $Data::Dumper::Useqq  = 1;
 local $Data::Dumper::Indent = 3;
 
-use IO::CaptureOutput qw( capture_exec );
 use Carp;
 use Cwd;
+use IO::CaptureOutput qw( capture_exec );
 use Apache::Admin::Config; ## For manipulating Apache config
 
 use FindBin;
@@ -79,15 +79,10 @@ sub new{
 
     ## Setting some defaults
     $self->{ 'run_dir' } = getcwd;
-    $self->{ 'port' } = $args->{ 'port' } || 8080
-        unless $self->{ 'port' };
-    $self->{ 'apache_home' } = $args->{ 'apache_home' } || '/opt/apache'
-        unless $self->{ 'apache_home' };
-    $self->{ 'apache_conf' } = $args->{ 'apache_conf' }
-        || "$self->{ 'run_dir' }/conf/httpd.conf"
-        || "$self->{ 'apache_home' }/conf/httpd.conf"
-        unless $self->{ 'apache_conf' };
-    $self->{ 'action' } = $args->{ 'action' } || 'nop' ## Dummy default to 'No Op'
+    $self->{ 'port' } = 8080 unless $self->{ 'port' };
+    $self->{ 'apache_home' } = '/opt/apache' unless $self->{ 'apache_home' };
+    $self->{ 'apache_conf' } = "$self->{ 'apache_home' }/conf/httpd.conf" unless $self->{ 'apache_conf' };
+    $self->{ 'action' } = 'nop' ## Dummy default to 'No Op'
         unless $self->{ 'action' };
 
     ## Calculate this from apache_home
@@ -254,6 +249,12 @@ sub _apachectl {
 
     return $success;
 }
+
+=head1 DEPENDENCIES
+
+IO::CaptureOutput
+
+Apache::Admin::Config
 
 =head1 AUTHOR
 

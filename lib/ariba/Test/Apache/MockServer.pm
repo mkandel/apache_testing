@@ -164,6 +164,10 @@ sub stop {
     }
 }
 
+=head1 DEPENDENCIES
+
+IO::CaptureOutput
+
 =head1 AUTHOR
 
 Marc Kandel C<< <mkandel at ariba.com> >>

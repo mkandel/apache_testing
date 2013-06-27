@@ -157,6 +157,10 @@ sub stop_mock {
     return $retval;
 }
 
+=head1 DEPENDENCIES
+
+IO::CaptureOutput
+
 =head1 AUTHOR
 
 Marc Kandel C<< <mkandel at ariba.com> >>
