@@ -150,7 +150,6 @@ next_req()
 =cut
 
 sub _mk_iter {
-    my $self = shift;
     my $arr = shift;
 
     my $i;
@@ -162,11 +161,12 @@ sub _mk_iter {
 
 sub next_req {
     my $self = shift;
-
-    my $iter = _mk_iter( $self->{ 'req_objs' } );
-    while ( my $ret = $iter->() ){
-        return $ret;
+    if(not $self->{req_objs_iter}) {
+        $self->{req_objs_iter} = _mk_iter( $self->{ 'req_objs' });
     }
+    my $ret = $self->{req_objs_iter}->();
+    undef $self->{req_objs_iter} unless defined $ret;
+    return $ret;
 }
 
 =head1 DEPENDENCIES
@@ -190,4 +190,3 @@ Copyright 2013 Ariba, Inc. (an SAP Company)
 1; # End of Module
 
 __END__
-
