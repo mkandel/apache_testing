@@ -16,7 +16,10 @@ use Carp;
 use Cwd;
 use IO::CaptureOutput qw( capture_exec );
 use Time::HiRes;
+
 use Parallel::ForkManager;
+##  ^^^^^^^^^^^^^^^^^^^^^
+## See docs at http://search.cpan.org/~szabgab/Parallel-ForkManager-1.03/lib/Parallel/ForkManager.pm
 
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
@@ -96,12 +99,28 @@ sub new{
         push $self->{ 'req_objs' }, ariba::Test::Apache::Request->new();
     }
 
+    $self->{ 'pool_mgr' } = Parallel::ForkManager->new( $self->{ 'num_reqs' } );
+
     if ( $self->{ 'debug' } ){
         print __PACKAGE__, ": Created object:\n";
         print Dumper $self;
     }
 
     return bless $self, $class;
+}
+
+sub get_all {
+    my $self = shift;
+
+    foreach my $req ( @{ $self->{ 'req_objs' } } ){
+        ## Here's where we'll use Parallel::ForkManager to spawn the gets
+        $self->{ 'pool_mgr' }->start and next; ##Idiomatic - see doc
+
+        ## This is the first time i'm using P::FM, hope this works ...
+        $req->get();
+        $self->{ 'pool_mgr' }->finish;
+    }
+    $self->{ 'pool_mgr' }->wait_all_children;
 }
 
 =head1 DEPENDENCIES
