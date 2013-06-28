@@ -54,9 +54,11 @@ use version; our $VERSION = '0.01';
     $req_pool->get_all();
 
     foreach my $req ( $req_pool->each() ){
-        $req->get( $url );
+    while ( my $req = $req_pool->next_req() ) {
+        print "Request return code: ", $req->resp->code(), "\n";
+        print "Response contents:\n";
         print $req->resp->content();
-        print "response received in ", $req->resp_time(), " seconds\n";
+        print "Response received in ", $req->resp_time(), " seconds\n";
     }
 
 =head1 DESCRIPTION
@@ -96,7 +98,7 @@ sub new{
 
     ## Populate the requests array with request objects
     foreach my $req ( 1..$self->{ 'num_reqs' } ){
-        push $self->{ 'req_objs' }, ariba::Test::Apache::Request->new();
+        push @{ $self->{ 'req_objs' } }, ariba::Test::Apache::Request->new({ debug => $self->{ 'debug' } });
     }
 
     $self->{ 'pool_mgr' } = Parallel::ForkManager->new( $self->{ 'num_reqs' } );
@@ -108,6 +110,18 @@ sub new{
 
     return bless $self, $class;
 }
+
+=head1
+
+get_all() 
+
+    FUNCTION: Retrieve URLs for all ariba::Test::Apache::Request objects in the pool
+
+   ARGUMENTS: None
+           
+     RETURNS: TODO: Not sure what I'll return here ... possibly nothing ...
+
+=cut
 
 sub get_all {
     my $self = shift;
@@ -121,6 +135,38 @@ sub get_all {
         $self->{ 'pool_mgr' }->finish;
     }
     $self->{ 'pool_mgr' }->wait_all_children;
+}
+
+=head1
+
+next_req() 
+
+    FUNCTION: Iterator for the ariba::Test::Apache::Request objects in the pool
+
+   ARGUMENTS: None
+           
+     RETURNS: The "next" ariba::Test::Apache::Request object in the pool, undef when no more are left
+
+=cut
+
+sub _mk_iter {
+    my $self = shift;
+    my $arr = shift;
+
+    my $i;
+    return sub {
+        $i = 0 unless $i;
+        return $arr->[ $i++ ];
+    };
+}
+
+sub next_req {
+    my $self = shift;
+
+    my $iter = _mk_iter( $self->{ 'req_objs' } );
+    while ( my $ret = $iter->() ){
+        return $ret;
+    }
 }
 
 =head1 DEPENDENCIES
