@@ -103,6 +103,21 @@ sub new{
 
     $self->{ 'pool_mgr' } = Parallel::ForkManager->new( $self->{ 'num_reqs' } );
 
+    $self->{ 'pool_mgr' }->run_on_start( sub {
+        my ( $pid, $ident ) = @_;
+        print "** $ident started, pid: $pid\n";
+    });
+
+    $self->{ 'pool_mgr' }->run_on_finish( sub {
+        my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
+        print "** $ident just got out of the pool with PID $pid and exit code: $exit_code\n";
+        if ( defined( $data_structure_reference )) {
+            $self->{ 'req_objs' }->[ $ident ] = $data_structure_reference;
+        } else {
+            print "No data recieved from child '$ident'\n";
+        }
+    });
+
     if ( $self->{ 'debug' } ){
         print __PACKAGE__, ": Created object:\n";
         print Dumper $self;
@@ -126,13 +141,16 @@ get_all()
 sub get_all {
     my $self = shift;
 
+    my $child = 0;
     foreach my $req ( @{ $self->{ 'req_objs' } } ){
         ## Here's where we'll use Parallel::ForkManager to spawn the gets
-        $self->{ 'pool_mgr' }->start and next; ##Idiomatic - see doc
+        my $orig = $child;
+        $self->{ 'pool_mgr' }->start( $child++ ) and next; ##Idiomatic - see doc
 
         ## This is the first time i'm using P::FM, hope this works ...
         $req->get();
-        $self->{ 'pool_mgr' }->finish;
+        $self->{ 'pool_mgr' }->finish( $orig, $req );
+        $child++;
     }
     $self->{ 'pool_mgr' }->wait_all_children;
 }
@@ -161,11 +179,14 @@ sub _mk_iter {
 
 sub next_req {
     my $self = shift;
-    if(not $self->{req_objs_iter}) {
-        $self->{req_objs_iter} = _mk_iter( $self->{ 'req_objs' });
+
+    if( not $self->{ req_objs_iter } ) {
+        $self->{ req_objs_iter } = _mk_iter( $self->{ 'req_objs' });
     }
-    my $ret = $self->{req_objs_iter}->();
-    undef $self->{req_objs_iter} unless defined $ret;
+
+    my $ret = $self->{ req_objs_iter }->();
+    undef $self->{ req_objs_iter } unless defined $ret;
+
     return $ret;
 }
 

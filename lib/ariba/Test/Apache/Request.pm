@@ -103,6 +103,10 @@ sub get {
 
     croak "Must set a URL to get!\n" unless $self->{ 'url' };
 
+    if ( $self->{ 'debug' } ){
+        print __PACKAGE__, ": get: Getting '$self->{ 'url' }'\n";
+    }
+
     my $mech = WWW::Mechanize->new();
 
     ## Start timer
@@ -115,7 +119,14 @@ sub get {
     $self->_has_timing( 1 ); ## Set _has_timing to true
 
     my $success = $mech->success;
+
+    if ( $self->{ 'debug' } ){
+        print __PACKAGE__, ": get: '$self->{ 'url' }' ", $success ? '' : 'NOT', " retrieved Successfully\n";
+    }
+
     if ( $success ){
+#        print "Setting response for '", $mech->res()->base(), "'\n";
+#        print Dumper $mech->res();
         $self->{ 'resp' } = $mech->response(); ## An HTTP::Response object
     }
     
@@ -139,6 +150,11 @@ sub url {
     my $url = shift;
 
     my $ret = undef;
+
+    if ( $url && $self->{ 'debug' } ) {
+        print __PACKAGE__, ": url: Seting url to '$url'\n";
+    }
+
 
     $self->{ 'url' } = $url if $url;
     $ret = $self->{ 'url' } if $self->{ 'url' };
@@ -178,6 +194,12 @@ resp()
 
 sub resp {
     my $self = shift;
+    my $resp = shift;
+
+    if ( defined( $resp )){
+        $self->{ 'resp' } = $resp;
+    }
+
     return $self->{ 'resp' };
 }
 
