@@ -57,7 +57,7 @@ The mock is based on Mojolicious, a Perl web framework.  This is all contained i
 
 =head1 PUBLIC METHODS
 
-new() 
+=item new() 
 
     FUNCTION: Instantiate a ariba::Test::Apache::TestServer object
 
@@ -118,7 +118,7 @@ sub new{
 
 =head1
 
-start()/stop()/restart()/graceful()/graceful_stop()
+=item start()/stop()/restart()/graceful()/graceful_stop()
 
     FUNCTION: Starts/Stops/Restarts the apache server
 
@@ -171,7 +171,7 @@ sub DESTROY {
 
 =head1
 
-is_running()
+=item is_running()
 
     FUNCTION: Starts/Stops/Restarts the apache server
 
@@ -191,7 +191,7 @@ sub is_running {
 
 =head1 PRIVATE METHODS
 
-_apachectl()
+=item _apachectl()
 
     FUNCTION: 
 

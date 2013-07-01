@@ -23,7 +23,8 @@ GetOptions(
 );
 
 my $port = 9898;
-my $url = "http://127.0.0.1:$port";
+#my $url = "http://127.0.0.1:$port/";
+my $url = "http://127.0.0.1:$port/sleep/2";
 
 my $prog = $0;
 $prog =~ s/^.*\///;
@@ -52,11 +53,16 @@ sub test_pool {
 
     $req_pool->get_all();
 
+    my $tot = 0;
     my $print = 0;
     while ( my $req = $req_pool->next_req() ) {
 #        print Dumper $req;
+        print "Handling obj: $req->{name}\n";
+        $tot += $req->resp_time();
         print_req( $req, $print++ );
     }
+    my $avg = $tot/$print;
+    print "Average request time: $avg seconds (", $avg * 1000000, " microseconds)\n";
 }
 
 sub print_req {
@@ -69,8 +75,8 @@ sub print_req {
 #    }
 
     print "Request return code: ", $req->resp->code, "\n";
-    print "Response contents:\n";
-    print $req->resp->content();
+#    print "Response contents:\n";
+#    print $req->resp->content();
     print "Response received in ", $req->resp_time(), " seconds (", $req->resp_time() * 1000000, " microseconds)\n";
 }
 

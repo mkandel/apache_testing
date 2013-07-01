@@ -51,7 +51,7 @@ Convenience class.  Uses Time::HiRes and WWW::Mechanize to time and retrieve a U
 
 =head1 PUBLIC METHODS
 
-new()
+=item new()
 
     FUNCTION: Instantiate a ariba::Test::Apache::Request object
 
@@ -85,7 +85,7 @@ sub new{
 
 =head1
 
-get()
+=item get()
 
     FUNCTION: Time and request the URL associated with this object or one passed to this method
 
@@ -135,7 +135,7 @@ sub get {
 
 =head1
 
-url()
+=item url()
 
     FUNCTION: Get/Set URL associated with an instance of this object
 
@@ -164,7 +164,7 @@ sub url {
 
 =head1
 
-resp_time()
+=item resp_time()
 
     FUNCTION: Get the response time of the request
 
@@ -182,7 +182,7 @@ sub resp_time {
 
 =head1
 
-resp()
+=item resp()
 
     FUNCTION: Response to the most recent get() request for this object
 
@@ -205,7 +205,7 @@ sub resp {
 
 =head1 PRIVATE METHODS
 
-_has_timing()
+=item _has_timing()
 
     FUNCTION: Tell whether this instance has timing info or not
 

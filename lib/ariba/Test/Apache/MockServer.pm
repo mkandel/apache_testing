@@ -63,7 +63,7 @@ The mock is based on Mojolicious, a Perl web framework.  This is all contained i
 
 =head1 PUBLIC METHODS
 
-new() 
+=item new() 
 
     FUNCTION: Instantiate a ariba::Test::Apache::MockServer object
 
@@ -100,7 +100,7 @@ sub new{
 
 =head1
 
-start()/stop() 
+=item start()/stop() 
 
     FUNCTION: Starts/Stops a mock server
 

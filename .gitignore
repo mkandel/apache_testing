@@ -3,3 +3,5 @@ doit.pl
 .nfs*
 commands
 cover_db/*
+*.out*
+pod_correct.yaml

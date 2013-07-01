@@ -68,7 +68,7 @@ use version; our $VERSION = '0.01';
 
 =head1 PUBLIC METHODS
 
-new() 
+=item new() 
 
     FUNCTION: Instantiate a ariba::Test::Apache::RequestPool object
 
@@ -96,22 +96,25 @@ sub new{
     ## Set to $MAX_REQUESTS if the user chose a value > $MAX_REQUESTS
     $self->{ 'num_reqs' } = $MAX_REQUESTS if $self->{ 'num_reqs' } > $MAX_REQUESTS;
 
+    my $obj_num = 0;
     ## Populate the requests array with request objects
     foreach my $req ( 1..$self->{ 'num_reqs' } ){
-        push @{ $self->{ 'req_objs' } }, ariba::Test::Apache::Request->new({ debug => $self->{ 'debug' } });
+        push @{ $self->{ 'req_objs' } }, ariba::Test::Apache::Request->new({ name => $obj_num++,debug => $self->{ 'debug' } });
     }
 
     $self->{ 'pool_mgr' } = Parallel::ForkManager->new( $self->{ 'num_reqs' } );
 
     $self->{ 'pool_mgr' }->run_on_start( sub {
         my ( $pid, $ident ) = @_;
-        print "** $ident started, pid: $pid\n";
+#        print "** $ident started, pid: $pid\n" if $self->{ 'debug' };
     });
 
     $self->{ 'pool_mgr' }->run_on_finish( sub {
         my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
-        print "** $ident just got out of the pool with PID $pid and exit code: $exit_code\n";
+#        print "** $ident just got out of the pool with PID $pid and exit code: $exit_code\n"
+#            if $self->{ 'debug' };
         if ( defined( $data_structure_reference )) {
+            print "Setting resp for '$ident'\n";
             $self->{ 'req_objs' }->[ $ident ] = $data_structure_reference;
         } else {
             print "No data recieved from child '$ident'\n";
@@ -128,7 +131,7 @@ sub new{
 
 =head1
 
-get_all() 
+=item get_all() 
 
     FUNCTION: Retrieve URLs for all ariba::Test::Apache::Request objects in the pool
 
@@ -157,7 +160,7 @@ sub get_all {
 
 =head1
 
-next_req() 
+=item next_req() 
 
     FUNCTION: Iterator for the ariba::Test::Apache::Request objects in the pool
 

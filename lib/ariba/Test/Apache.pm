@@ -61,7 +61,7 @@ Background: Ariba is hesitant to upgrade Apache due to our inability to pre-qual
 
 =head1 PUBLIC METHODS
 
-new() 
+=item new() 
 
     FUNCTION: Instantiate an ariba::Test::Apache onject
 
@@ -96,7 +96,7 @@ sub new {
 
 =head1
 
-start_server()/stop_server() 
+=item start_server()/stop_server() 
 
     FUNCTION: Start/Stop Apache under test
 
@@ -126,7 +126,7 @@ sub stop_server {
 
 =head1
 
-start_mock()/stop_mock() 
+=item start_mock()/stop_mock() 
 
     FUNCTION: Start/Stop a mock server
 
