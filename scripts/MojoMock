@@ -28,17 +28,18 @@ get '/sleep/*time' => sub {
     my $self = shift;
 
     my $sleeptime = $self->param( 'time' );
-    print "Got '$sleeptime' seconds\n";
+    print "Mock: Got '$sleeptime' seconds\n";
     $self->stash( sleeptime => $sleeptime );
     $self->stash( port => $self->tx->local_port );
 
-    print "Sleeping for '$sleeptime' seconds\n";
+    print "Mock: Sleeping for '$sleeptime' seconds\n";
     sleep $sleeptime;
-    print "Done sleeping\n";
+    print "Mock: Done sleeping\n";
     $self->render( 'sleep_t' );
 };
 
 ## Silence the damn messages this outputs ...
+#app->config(hypnotoad => {} );
 app->log->level( 'fatal' );
 app->start( -daemon );
 __DATA__

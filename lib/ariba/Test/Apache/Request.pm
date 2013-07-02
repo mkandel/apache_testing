@@ -115,7 +115,10 @@ sub get {
     ## Make http request:
     $mech->get( $self->{ 'url' } );
     ## Stop timer
-    $self->{ 'resp_time' } = time - $start;
+    my $end_time = time;
+    my $finish = $end_time - $start;
+    $self->{ 'resp_time' } = $finish;
+#    print "** '$self->{'name'}' ($self): ResponseTime: '$self->{ 'resp_time' }'\tStart: '$start' End: '$end_time'\n";
     $self->_has_timing( 1 ); ## Set _has_timing to true
 
     my $success = $mech->success;

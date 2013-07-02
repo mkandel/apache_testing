@@ -63,10 +63,13 @@ use version; our $VERSION = '0.01';
 
 =head1 DESCRIPTION
 
+ariba::Test::Apache::RequestPool is a container of ariba::Test::Apache::Request objects.  This uses Parallel::ForkManager for concurrency.
 
 =cut
 
 =head1 PUBLIC METHODS
+
+=over 1
 
 =item new() 
 
@@ -104,10 +107,10 @@ sub new{
 
     $self->{ 'pool_mgr' } = Parallel::ForkManager->new( $self->{ 'num_reqs' } );
 
-    $self->{ 'pool_mgr' }->run_on_start( sub {
-        my ( $pid, $ident ) = @_;
+#    $self->{ 'pool_mgr' }->run_on_start( sub {
+#        my ( $pid, $ident ) = @_;
 #        print "** $ident started, pid: $pid\n" if $self->{ 'debug' };
-    });
+#    });
 
     $self->{ 'pool_mgr' }->run_on_finish( sub {
         my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
@@ -128,8 +131,6 @@ sub new{
 
     return bless $self, $class;
 }
-
-=head1
 
 =item get_all() 
 
@@ -158,7 +159,21 @@ sub get_all {
     $self->{ 'pool_mgr' }->wait_all_children;
 }
 
-=head1
+=item pool_size() 
+
+    FUNCTION: Returns the number of ariba::Test::Apache::Request objects in the pool
+
+   ARGUMENTS: None
+           
+     RETURNS: count of ariba::Test::Apache::Request objects in the pool object
+
+=cut
+
+sub pool_size {
+    my $self = shift;
+
+    return scalar @{ $self->{ 'req_objs' } };
+}
 
 =item next_req() 
 
@@ -192,6 +207,8 @@ sub next_req {
 
     return $ret;
 }
+
+=back
 
 =head1 DEPENDENCIES
 

@@ -131,10 +131,9 @@ sub new{
 sub AUTOLOAD {
     my $self = shift;
     our $AUTOLOAD;
+
     return if $AUTOLOAD =~ /::DESTROY$/;
-    if ( $self->{ 'debug' } ) {
-        print __PACKAGE__, ": AUTOLOAD: Got '$AUTOLOAD'\n";
-    }
+
     $AUTOLOAD =~ m/.*::(\w+)$/;
     my $action = $1;
 

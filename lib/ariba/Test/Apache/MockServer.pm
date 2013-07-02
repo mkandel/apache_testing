@@ -89,6 +89,7 @@ sub new{
     $self->{ 'mock_script' } = $self->{ 'script_dir' } . '/MojoMock';
 
     $self->{ 'mock_pids'   } = {};
+    $self->{ 'debug' } = 0 unless $self->{ 'debug' };
 
     if ( $self->{ 'debug' } ){
         print __PACKAGE__, ": Created object:\n";
@@ -127,10 +128,24 @@ sub start {
         use Mojo::Server::Daemon;
         my $server = Mojo::Server::Daemon->new( listen => ["http://*:$port"] );
         my $app = $server->load_app( $self->{ 'mock_script' } );
-
-        $server = $server->silent( 1 );
-
+        $app->config( hypnotoad => {} );
+        print Dumper $app;
+        $server = $server->silent( !$self->{ 'debug' } );
         $server->run;
+
+        ## Hypnotoad?
+#        use Mojo::Server::Hypnotoad;
+#        my $server = Mojo::Server::Hypnotoad->new( 
+#            listen => ["http://*:$port"], 
+#            clients => 100,
+#            multi_accept => 100,
+#        );
+#        $server->listen => ["http://*:$port"];
+#        $server->clients => 100;
+#        $server->multi_accept => 100;
+#        $server->run( $self->{ 'mock_script' } );
+#        print Dumper $server;
+
         return 1;
     } else {
         $self->{ 'mock_pids' }->{ "$port" } = $pid;

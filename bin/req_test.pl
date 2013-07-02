@@ -22,11 +22,8 @@ GetOptions(
     "dryrun|n"       => \$dryrun,
 );
 
-my $port = 9898;
-my $port2 = 9899;
-#my $url = "http://127.0.0.1:$port/";
+my $port = 8080;
 my $url = "http://127.0.0.1:$port/sleep/2";
-my $url2 = "http://127.0.0.1:$port2/";
 
 my $prog = $0;
 $prog =~ s/^.*\///;
@@ -34,8 +31,6 @@ $prog =~ s/^.*\///;
 use lib './lib';
 use ariba::Test::Apache::RequestPool;
 use ariba::Test::Apache::Request;
-use ariba::Test::Apache::MockServer;
-use ariba::Test::Apache::TestServer;
 
 sub test_request {
     my $req = ariba::Test::Apache::Request->new({ debug => $mydebug });
@@ -51,6 +46,10 @@ sub test_request {
 sub test_pool {
     my $req_pool = ariba::Test::Apache::RequestPool->new({ num_reqs => 10, debug => $mydebug });
 
+    print "This should fail: \n";
+    $req_pool->get_all();
+    exit;
+    
     while ( my $req = $req_pool->next_req() ){
         $req->url( $url );
     }
@@ -71,14 +70,6 @@ sub test_pool {
     return 0;
 }
 
-sub test_pool2 {
-    my $req_pool = ariba::Test::Apache::RequestPool->new({ num_reqs => 10, debug => $mydebug });
-
-    $req_pool->get_all();
-
-    return 0;
-}
-
 sub print_req {
     my $req = shift;
     my $print = shift || 0;
@@ -94,21 +85,9 @@ sub print_req {
     print "Response received in ", $req->resp_time(), " seconds (", $req->resp_time() * 1000000, " microseconds)\n";
 }
 
-my $mock = ariba::Test::Apache::MockServer->new();
-my $test = ariba::Test::Apache::TestServer->new({ port => $port2 });
-
-print "Starting mock on port '$port'\n";
-$mock->start( $port );
-sleep 3; ## Give the mock a few seconds to come up
-
 #test_request();
 #print "########################################################\n";
-#test_pool();
-print "########################################################\n";
-test_pool2();
-
-## Stop the mock now that we're done with it
-$mock->stop( $port );
+test_pool();
 
 __END__
 
