@@ -148,11 +148,15 @@ sub get_all {
     my $child = 0;
     foreach my $req ( @{ $self->{ 'req_objs' } } ){
         ## Here's where we'll use Parallel::ForkManager to spawn the gets
+        ## This is the first time i'm using P::FM, hope this works ...
         my $orig = $child;
         $self->{ 'pool_mgr' }->start( $child++ ) and next; ##Idiomatic - see doc
+        eval{
+            ## Run this in an eval so we can catch any errors
 
-        ## This is the first time i'm using P::FM, hope this works ...
-        $req->get();
+            $req->get();
+        };
+        croak "*** $@ ***" if $@;
         $self->{ 'pool_mgr' }->finish( $orig, $req );
         $child++;
     }

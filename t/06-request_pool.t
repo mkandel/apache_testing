@@ -45,7 +45,8 @@ EOT
 
     my $req_pool = module_under_test()->new({ num_reqs => $pool_size });
 
-    dies_ok { $req_pool->get_all() } 'get_all on an pool without setting URLs';
+#    dies_ok { $req_pool->get_all() } 'get_all on an pool without setting URLs';
+#    throws_ok { $req_pool->get_all() } qr{Must set a URL to get}, 'Attempt to get() wihout setting a URL';
 
     while ( my $req = $req_pool->next_req() ){
         $req->url( $url );
