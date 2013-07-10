@@ -1,7 +1,3 @@
-#------------------------------------------------------------------------------
-# $Id$
-# $HeadURL$
-#------------------------------------------------------------------------------
 package ariba::Test::Apache::Request;
 
 use warnings;
@@ -118,19 +114,17 @@ sub get {
     my $end_time = time;
     my $finish = $end_time - $start;
     $self->{ 'resp_time' } = $finish;
-#    print "** '$self->{'name'}' ($self): ResponseTime: '$self->{ 'resp_time' }'\tStart: '$start' End: '$end_time'\n";
-    $self->_has_timing( 1 ); ## Set _has_timing to true
 
     my $success = $mech->success;
 
     if ( $self->{ 'debug' } ){
+        # uncoverable branch false ## Devel::Cover uncoverable
         print __PACKAGE__, ": get: '$self->{ 'url' }' ", $success ? '' : 'NOT', " retrieved Successfully\n";
     }
 
-    if ( $success ){
-#        print "Setting response for '", $mech->res()->base(), "'\n";
-#        print Dumper $mech->res();
-        $self->{ 'resp' } = $mech->response(); ## An HTTP::Response object
+    if ( $success ){ # uncoverable branch false ## Devel::Cover uncoverable
+        $self->resp( $mech->response() ); ## An HTTP::Response object
+        $self->_has_timing( 1 ); ## Set _has_timing to true
     }
     
     return $success;

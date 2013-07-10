@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
 use strict; use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 20;
 use Test::Exception;
 use Test::Warn;
 
@@ -41,12 +41,22 @@ BEGIN{
         throws_ok( sub { $mock1->$method() }, qr/Port required!/, 'Must specify port for start and stop actions' );
     }
 
+    throws_ok( sub { $mock1->start( 'asdf' ) }, qr/start: port must be numeric, you passed/,
+        'Port must be all numeric, no alpha characters' );
+
+    throws_ok( sub { $mock1->stop( 'asdf' ) }, qr/stop: port must be numeric, you passed/,
+        'Port must be all numeric, no alpha characters' );
+
+    throws_ok( sub { $mock1->start() }, qr/start: Port required!/, 'Port must have a value' );
+
+    throws_ok( sub { $mock1->stop() }, qr/stop: Port required!/, 'Port must have a value' );
+
     warning_like { $mock1->stop( $port1 ) } qr/Cannot kill mock for port .*: No mock running on that port/i
         , 'Warn about attempt to stop mock without port';
 
     ok( $mock1->start( $port1 ), 'Start a mock' );
 
-    warning_like { $mock1->start( $port1 ) } qr/ERROR: start_mock: Not starting another mock on port/i
+    warning_like { $mock1->start( $port1 ) } qr/ERROR: start: Not starting another mock on port/i
         , 'Warn about attempt to start a mock on a port that already has a mock';
 
     ok( $mock1->stop( $port1 ), 'Stop a mock' );
@@ -57,7 +67,7 @@ BEGIN{
     $mock1->stop( $port1 );
     $mock2->stop( $port2 );
 
-    ## Start two mocks from the same MockServer object.  (not even sure this will work ...)
+    ## Start two mocks from the same MockServer object
     ok( $mock1->start( $port1 ), 'Start two mocks from the same MockServer object.' );
     ok( $mock1->start( $port2 ), 'Start two mocks from the same MockServer object.' );
     ok( $mock1->stop( $port1 ), 'Stop two mocks from the same MockServer object.' );

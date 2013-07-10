@@ -66,7 +66,7 @@ sub test_pool {
         print_req( $req, $print++ );
     }
     my $avg = $tot/$print;
-    print "Average request time: $avg seconds (", $avg * 1000000, " microseconds)\n";
+    print "Average response time: $avg seconds (", $avg * 1000000, " microseconds)\n";
 #    print Dumper $req_pool;
     return 0;
 }
@@ -102,10 +102,10 @@ $mock->start( $port );
 sleep 3; ## Give the mock a few seconds to come up
 
 #test_request();
-#print "########################################################\n";
-#test_pool();
 print "########################################################\n";
-test_pool2();
+test_pool();
+#print "########################################################\n";
+#test_pool2();
 
 ## Stop the mock now that we're done with it
 $mock->stop( $port );

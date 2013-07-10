@@ -1,7 +1,3 @@
-#------------------------------------------------------------------------------
-# $Id$
-# $HeadURL$
-#------------------------------------------------------------------------------
 package ariba::Test::Apache::MockServer;
 
 use warnings;
@@ -113,40 +109,30 @@ sub new{
 
 sub start {
     my $self = shift;
-    my $port = shift || croak __PACKAGE__, ": start_mock: Port required!\n";
+    my $port = shift || croak __PACKAGE__, ": start: Port required!\n";
+
+    if ( $port !~ /^\d+$/ ){
+        croak __PACKAGE__, ": ERROR: start: port must be numeric, you passed '$port'\n";
+    }
 
     if ( defined $self->{ 'mock_pids' }->{ "$port" }
         && $self->{ 'mock_pids' }->{ "$port" } =~ /\d+/
     ){
         ## We already have a Mock on this port
-        carp __PACKAGE__, ": ERROR: start_mock: Not starting another mock on port '$port'\n";
+        carp __PACKAGE__, ": ERROR: start: Not starting another mock on port '$port'\n";
         return 0;
     }
 
     my $pid;
-    unless ( $pid = fork ){
+    unless ( $pid = fork ){ # uncoverable branch true ## Devel::Cover uncoverable
         use Mojo::Server::Daemon;
-        my $server = Mojo::Server::Daemon->new( listen => ["http://*:$port"] );
-        my $app = $server->load_app( $self->{ 'mock_script' } );
-        $app->config( hypnotoad => {} );
-        print Dumper $app;
-        $server = $server->silent( !$self->{ 'debug' } );
-        $server->run;
+        my $server = Mojo::Server::Daemon->new( listen => ["http://*:$port"] ); # uncoverable statement ## Devel::Cover uncoverable
+        my $app = $server->load_app( $self->{ 'mock_script' } ); # uncoverable statement ## Devel::Cover uncoverable
 
-        ## Hypnotoad?
-#        use Mojo::Server::Hypnotoad;
-#        my $server = Mojo::Server::Hypnotoad->new( 
-#            listen => ["http://*:$port"], 
-#            clients => 100,
-#            multi_accept => 100,
-#        );
-#        $server->listen => ["http://*:$port"];
-#        $server->clients => 100;
-#        $server->multi_accept => 100;
-#        $server->run( $self->{ 'mock_script' } );
-#        print Dumper $server;
+        $server = $server->silent( !$self->{ 'debug' } ); # uncoverable statement ## Devel::Cover uncoverable
+        $server->run; # uncoverable statement ## Devel::Cover uncoverable
 
-        return 1;
+        return 1; # uncoverable statement ## Devel::Cover uncoverable
     } else {
         $self->{ 'mock_pids' }->{ "$port" } = $pid;
 
@@ -161,8 +147,12 @@ sub start {
 
 sub stop {
     my $self = shift;
-    my $port = shift || croak __PACKAGE__, ": stop_mock: Port required!\n";
+    my $port = shift || croak __PACKAGE__, ": stop: Port required!\n";
 
+
+    if ( $port !~ /^\d+$/ ){
+        croak __PACKAGE__, ": ERROR: stop: port must be numeric, you passed '$port'\n";
+    }
 
     if ( defined $self->{ 'mock_pids' }->{ "$port" }
         && $self->{ 'mock_pids' }->{ "$port" } =~ /\d+/

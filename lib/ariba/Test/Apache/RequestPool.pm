@@ -1,7 +1,3 @@
-#------------------------------------------------------------------------------
-# $Id$
-# $HeadURL$
-#------------------------------------------------------------------------------
 package ariba::Test::Apache::RequestPool;
 
 use warnings;
@@ -116,11 +112,12 @@ sub new{
         my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
 #        print "** $ident just got out of the pool with PID $pid and exit code: $exit_code\n"
 #            if $self->{ 'debug' };
+        # uncoverable branch false ## Devel::Cover uncoverable
         if ( defined( $data_structure_reference )) {
             print "Setting resp for '$ident'\n";
             $self->{ 'req_objs' }->[ $ident ] = $data_structure_reference;
         } else {
-            print "No data recieved from child '$ident'\n";
+            print "No data recieved from child '$ident'\n"; # uncoverable statement ## Devel::Cover uncoverable
         }
     });
 
@@ -156,11 +153,12 @@ sub get_all {
 
             $req->get();
         };
+        # uncoverable branch true ## Devel::Cover uncoverable
         croak "*** $@ ***" if $@;
         $self->{ 'pool_mgr' }->finish( $orig, $req );
-        $child++;
     }
     $self->{ 'pool_mgr' }->wait_all_children;
+    return 1; ## Return true
 }
 
 =item pool_size() 
@@ -235,3 +233,4 @@ Copyright 2013 Ariba, Inc. (an SAP Company)
 1; # End of Module
 
 __END__
+

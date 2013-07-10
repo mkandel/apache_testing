@@ -1,7 +1,3 @@
-#------------------------------------------------------------------------------
-# $Id$
-# $HeadURL$
-#------------------------------------------------------------------------------
 package ariba::Test::Apache::TestServer;
 
 use warnings;
@@ -89,7 +85,7 @@ sub new{
     $self->{ 'apachectl' } = ariba::rc::Utils::sudoCmd() ." $self->{ 'apache_home' }/bin/apachectl";
 
     ## Since listen port is hard coded in the config, we'll muck with it here:
-    my $conf = new Apache::Admin::Config "$self->{ 'apache_conf' }"
+    my $conf = new Apache::Admin::Config "$self->{ 'apache_conf' }" # uncoverable branch true ## Devel::Cover uncoverable
         or die $Apache::Admin::Config::ERROR;
 
     my $directive = $conf->directive( 'Listen' );
@@ -100,7 +96,7 @@ sub new{
 
     ## Save filename in /tmp with port and PID
     $self->{ 'apache_conf_adj' } = "/tmp/httpd.$self->{ 'port' }.$$.conf";
-    $conf->save( "$self->{ 'apache_conf_adj' }" )
+    $conf->save( "$self->{ 'apache_conf_adj' }" ) # uncoverable branch true ## Devel::Cover uncoverable
         or croak "Error saving adjusted Apache config: ", $conf->error(), "\n";
 
     if ( $self->{ 'debug' } ){
@@ -132,7 +128,7 @@ sub AUTOLOAD {
     my $self = shift;
     our $AUTOLOAD;
 
-    return if $AUTOLOAD =~ /::DESTROY$/;
+    return if $AUTOLOAD =~ /::DESTROY$/; # uncoverable branch true ## Devel::Cover uncoverable
 
     $AUTOLOAD =~ m/.*::(\w+)$/;
     my $action = $1;
@@ -163,7 +159,7 @@ sub AUTOLOAD {
 sub DESTROY {
     my $self = shift;
     if ( -e $self->{ 'apache_conf_adj' } ){
-        unlink $self->{ 'apache_conf_adj' }
+        unlink $self->{ 'apache_conf_adj' } # uncoverable branch true ## Devel::Cover uncoverable
             or croak "Error deleting temp config file ($self->{ 'apache_conf_adj' }): $!\n";
     }
 }
@@ -231,18 +227,21 @@ sub _apachectl {
 
         print __PACKAGE__, ": '$action' returned Error(s):\n";
         foreach my $line ( @errs ){
-            chomp $line;
+            chomp $line; # uncoverable statement ## Devel::Cover uncoverable
             ## Except debug
+            # uncoverable statement ## Devel::Cover uncoverable
+            # uncoverable branch false ## Devel::Cover uncoverable
+            # uncoverable branch true ## Devel::Cover uncoverable
             if ( $line !~ /proxy:debug/ ){ ## ignore proxy:debug messages
-                print "  $line\n";
+                print "  $line\n"; # uncoverable statement ## Devel::Cover uncoverable
             }
         }
     }
 
     ## Set/unset is_running appropriately
-    if ( $action eq 'start' && $success ){ 
+    if ( $action eq 'start' && $success ){ # uncoverable condition right
         $self->{ 'is_running' } = 1;
-    } elsif ( $success && $action =~ /stop/ ){
+    } elsif ( $success && $action =~ /stop/ ){ # uncoverable condition right
         delete $self->{ 'is_running' };
     }
 

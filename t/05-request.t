@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
 use strict; use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 use Test::Exception;
 use Test::Warn;
 
@@ -35,7 +35,7 @@ BEGIN{
 <!DOCTYPE html>
 <html>
   <head><title>Balancer Testing</title></head>
-  <body>Listening on port: 9898
+  <body>Listening on port: $port
 </body>
 </html>
 EOT
@@ -49,6 +49,7 @@ EOT
     is( $req2->_has_timing(), 0, 'Should not have timing if we ahvent run got()' );
     is( $req2->url(), undef, 'url() should return undef if not set' );
     throws_ok { $req2->get() } qr{Must set a URL to get}, 'Attempt to get() wihout setting a URL';
+    is( $req2->resp_time(), undef, 'response time is undef before get()' );
     ok( $req2->get( "$url/sleep/" ), 'Get with URL in call' );
 
     ok( $req1->resp_time(), 'Got response time' );
