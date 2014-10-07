@@ -8,6 +8,7 @@ plugin 'PODRenderer';
 get '/' => sub {
     my $self = shift;
 
+    print "Mock: getting ROOT\n";
     $self->stash( port => $self->tx->local_port );
 
     $self->render( 'index_t' );
