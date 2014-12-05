@@ -1,1 +1,29 @@
 For details see https://devwiki.ariba.com/bin/view/Main/AribaTestApacheFramework
+
+ariba::Test::Apache
+I've started work on a framework to test Apache-httpd, below are notes and questions:
+General Notes:
+
+    Framework for testing Apache httpd
+    Modular/extendable, etc.
+    Ability to test all Apache functionality we use at Ariba, including:
+        Rewrite rules
+        mod_jk/WO/mod_proxy_balancer "workers" represented by ariba::Test::Apache::MockServer objects
+        Proxying
+        SSL??
+        Caching??
+        Logging??
+        Deflate??
+        Uploads?? (LimitRequestBody)
+        Specific ErrorDocument handling?? (400, 404, 413)
+        Busy page??
+        Access Control?? 
+
+ariba::Test::Apache
+
+    Base class for running tests, proxies to the ariba::Test::Apache::TestServer and ariba::Test::Apache::MockServer(s) it controlls 
+
+ariba::Test::Apache::TestServer
+*
+ariba::Test::Apache::MockServer
+* 
