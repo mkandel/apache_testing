@@ -80,6 +80,8 @@ sub new {
 
     while ( my ( $key, $val ) = each %{ $args } ){
         $self->{ $key } = $val;
+        # uncoverable branch
+        # uncoverable statement
         print "$key: $val\n" if $args->{ 'debug' };
     }
 
@@ -114,7 +116,10 @@ sub start_server {
 sub stop_server {
     my $self = shift;
 
+    # uncoverable branch
+    # uncoverable statement
     unless ( $self->{ 'test_server' }->is_running() ){
+        # uncoverable statement
         croak "Server not started, can't call stop.\n";
     }
     return $self->{ 'test_server' }->stop();
