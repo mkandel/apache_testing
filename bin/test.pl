@@ -40,7 +40,7 @@ my $apache_test  = ariba::Test::Apache->new({
         port => 8888,
         debug => 1,
         apache_home => '/opt/apache',
-        apache_conf => '/home/mkandel/src/POC/apache_testing/ariba_tests/framework/conf/httpd.conf',
+        apache_conf => 'conf/httpd.conf',
         apachectl   => '/opt/apache/bin/apachectl',
         action      => 'nop',
 });
