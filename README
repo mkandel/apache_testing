@@ -30,6 +30,9 @@ ariba::Test::Apache::MockServer
 
 DEPENDENCIES
 
+Apache to test installed into /opt/apache (configurable)
+
+CPAN Modules:
 Devel::Cover
 IO::CaptureOutput
 Test::Compile
@@ -44,4 +47,4 @@ Net::SSLEay
 WWW::Mechanize
 Apache::Admin::Config
 IO::Pty
-
+Test::Pod::Coverage
